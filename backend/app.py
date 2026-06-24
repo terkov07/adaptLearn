@@ -21,9 +21,12 @@ def explain():
     if not data or not data.get('topic'):
         return jsonify({'error': 'Topic is required'}), 400
 
+    if not data.get('style'):
+        return jsonify({'error': 'Style is required'}), 400
+
     topic = data['topic']
-    style = data.get('style', 'analogy')
-    education_level = data.get('education_level', 'alevel')
+    style = data['style']
+    education_level = data.get('education_level')  # optional — None if not sent
 
     try:
         from services.claude_service import get_explanation
@@ -36,5 +39,27 @@ def explain():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+@app.route('/api/quiz', methods=['POST'])
+def quiz():
+    data = request.json
+
+    if not data or not data.get('explanation_text'):
+        return jsonify({'error': 'Explanation text is required'}), 400
+
+    explanation_text = data['explanation_text']
+    num_questions = data.get('num_questions', 3)
+    education_level = data.get('education_level')
+
+    try:
+        from services.claude_service import generate_quiz
+        questions = generate_quiz(explanation_text, num_questions, education_level)
+        return jsonify({
+            'questions': questions,
+            'num_questions': num_questions
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)

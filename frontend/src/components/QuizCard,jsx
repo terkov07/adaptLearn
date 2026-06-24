@@ -1,0 +1,53 @@
+import { useState } from 'react'
+
+function QuizCard({ questions }) {
+    const [currentIndex, setCurrentIndex] = useState(0)
+    const [answers, setAnswers] = useState([])
+    const [done, setDone] = useState(false)
+
+    const currentQuestion = questions[currentIndex]
+
+    function handleAnswer(selectedIndex) {
+        const newAnswers = [...answers, selectedIndex]
+        setAnswers(newAnswers)
+
+        if (currentIndex < questions.length - 1) {
+            setCurrentIndex(currentIndex + 1)
+        } else {
+            setDone(true)
+        }
+    }
+
+    function getScore() {
+        let correct = 0
+        answers.forEach((answer, index) => {
+            if (answer === questions[index].correct_index) {
+                correct++
+            }
+        })
+        return Math.round((correct / questions.length) * 100)
+    }
+
+    if (done) {
+        return (
+            <div>
+                <h2>Quiz complete!</h2>
+                <p>You scored {getScore()}%</p>
+            </div>
+        )
+    }
+
+    return (
+        <div>
+            <p>Question {currentIndex + 1} of {questions.length}</p>
+            <h3>{currentQuestion.question}</h3>
+            {currentQuestion.options.map((option, index) => (
+                <button key={index} onClick={() => handleAnswer(index)}>
+                    {option}
+                </button>
+            ))}
+        </div>
+    )
+}
+
+export default QuizCard
