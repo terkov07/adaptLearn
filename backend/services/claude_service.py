@@ -17,7 +17,7 @@ STYLE_PROMPTS = {
 def get_explanation(topic, style, education_level='alevel'):
     style_instruction = STYLE_PROMPTS.get(style, STYLE_PROMPTS['analogy'])
     context = f'The learner is at {education_level} level.'
-    prompt = f'{context} {style_instruction} Topic: {topic}. Keep under 300 words.'
+    prompt = f'{context} {style_instruction} Topic: {topic}. Keep under 200 words.'
 
     message = client.messages.create(
         model='claude-haiku-4-5-20251001',
