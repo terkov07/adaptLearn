@@ -1,0 +1,65 @@
+.onboarding {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.progress-dots {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #DDDDDD;
+}
+
+.dot-active {
+  background: #5B4EC8;
+}
+
+.onboarding-framing {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.onboarding-heading {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1a1a1a;
+}
+
+.onboarding-question {
+  font-size: 16px;
+  color: #444;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.onboarding-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.onboarding-option {
+  padding: 16px 20px;
+  border: 1.5px solid #DDDDDD;
+  border-radius: 10px;
+  background: white;
+  text-align: left;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.onboarding-option:hover {
+  border-color: #5B4EC8;
+  background: #EEEDFE;
+}
