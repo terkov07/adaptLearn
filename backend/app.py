@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from models import db, User
 import os
+from routes.auth import auth_bp
 
 load_dotenv()
 
@@ -51,6 +52,8 @@ def quiz():
         return jsonify({'questions': questions, 'num_questions': num_questions})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+app.register_blueprint(auth_bp)
 
 if __name__ == '__main__':
     with app.app_context():
