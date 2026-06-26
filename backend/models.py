@@ -27,6 +27,9 @@ class UserPreferences(db.Model):
     subject_background = db.Column(db.String)
     preferred_style = db.Column(db.String)
     approach = db.Column(db.String)
+    cognitive_style = db.Column(db.String)    # Q2 — concrete vs abstract
+    anxiety_response = db.Column(db.String)   # Q3 — anxiety / cognitive load
+    memory_style = db.Column(db.String)       # Q4 — narrative vs analytical
     motivation = db.Column(db.String)
     complexity_pref = db.Column(db.String)
     learning_context = db.Column(db.String)
