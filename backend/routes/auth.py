@@ -236,14 +236,11 @@ def me():
 
 @auth_bp.route('/api/auth/onboarding', methods=['POST'])
 def onboarding():
-    #user_id = session.get('user_id')
-    #if not user_id:
-        #return jsonify({'error': 'Not logged in'}), 401
-
-    # hardcode user_id 1 for testing
-    user = User.query.get(1)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    user = User.query.get(user_id)
 
     data = request.json
     q1 = data.get('q1')
