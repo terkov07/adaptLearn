@@ -721,3 +721,155 @@
   padding: 20px;
   margin-bottom: 20px;
 }
+
+/* RAG rating */
+.rag-wrap {
+  margin-top: 24px;
+  padding: 20px;
+  background: white;
+  border: 1.5px solid #DDDDDD;
+  border-radius: 12px;
+}
+
+.rag-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+.rag-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.rag-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.rag-btn:disabled { opacity: 0.5; cursor: default; }
+
+.rag-red {
+  background: #FAECE7;
+  color: #993C1D;
+  border-color: #F0C4B8;
+}
+
+.rag-amber {
+  background: #FAEEDA;
+  color: #854F0B;
+  border-color: #F0D4A8;
+}
+
+.rag-green {
+  background: #E1F5EE;
+  color: #0F6E56;
+  border-color: #A8DDD0;
+}
+
+/* Attempt banner */
+.attempt-banner {
+  background: #FAEEDA;
+  border: 1.5px solid #F0D4A8;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #854F0B;
+  margin-bottom: 16px;
+}
+
+/* Exhausted message */
+.exhausted-message {
+  margin-top: 24px;
+  padding: 24px;
+  background: white;
+  border: 1.5px solid #DDDDDD;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.exhausted-message h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.exhausted-message p {
+  font-size: 15px;
+  color: #666;
+}
+
+/* Quiz placeholder */
+.quiz-placeholder {
+  margin-top: 24px;
+  padding: 24px;
+  background: #E1F5EE;
+  border: 1.5px solid #A8DDD0;
+  border-radius: 12px;
+}
+
+.quiz-placeholder h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0F6E56;
+  margin-bottom: 8px;
+}
+
+/* New topic button */
+.new-topic-btn {
+  background: none;
+  border: none;
+  color: #5B4EC8;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+.style-picker-wrap {
+  margin-top: 20px;
+  padding: 20px;
+  background: white;
+  border: 1.5px solid #DDDDDD;
+  border-radius: 12px;
+}
+
+.style-picker-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+.style-picker-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.style-picker-btn {
+  padding: 10px 18px;
+  background: #EEEDFE;
+  color: #3C3489;
+  border: 1.5px solid #5B4EC8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: background 0.15s;
+}
+
+.style-picker-btn:hover {
+  background: #5B4EC8;
+  color: white;
+}

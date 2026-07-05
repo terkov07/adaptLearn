@@ -84,6 +84,27 @@ def explain():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/explanations/<int:explanation_id>/rag', methods=['PATCH'])
+def rate_explanation(explanation_id):
+    data = request.json
+    rating = data.get('rating')
+
+    if rating not in ['red', 'amber', 'green']:
+        return jsonify({'error': 'Invalid rating'}), 400
+
+    from models import Explanation
+    explanation = Explanation.query.get(explanation_id)
+    if not explanation:
+        return jsonify({'error': 'Explanation not found'}), 404
+
+    explanation.rag_rating = rating
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'next_action': 'quiz' if rating == 'green' else 'retry'
+    })
 
 @app.route('/api/quiz', methods=['POST'])
 def quiz():
