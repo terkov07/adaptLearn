@@ -219,20 +219,20 @@ def me():
             'nickname': user.nickname,
             'email': user.email,
             'preferences': {
-                'education_level': user.preferences.education_level,
-                'preferred_style': user.preferences.preferred_style,
-                'theme': user.preferences.theme,
-                'text_size': user.preferences.text_size,
-                'auto_advance': user.preferences.auto_advance,
+                'education_level': user.preferences.education_level if user.preferences else None,
+                'preferred_style': user.preferences.preferred_style if user.preferences else None,
+                'theme': user.preferences.theme if user.preferences else 'focus',
+                'text_size': user.preferences.text_size if user.preferences else 'md',
             },
             'stats': {
-                'xp': user.stats.xp,
-                'streak': user.stats.streak,
-                'total_sessions': user.stats.total_sessions,
-                'total_topics': user.stats.total_topics,
+                'xp': user.stats.xp if user.stats else 0,
+                'streak': user.stats.streak if user.stats else 0,
+                'total_sessions': user.stats.total_sessions if user.stats else 0,
+                'total_topics': user.stats.total_topics if user.stats else 0,
             }
         }
     })
+
 
 @auth_bp.route('/api/auth/onboarding', methods=['POST'])
 def onboarding():
