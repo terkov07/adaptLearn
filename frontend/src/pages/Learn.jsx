@@ -6,6 +6,7 @@ import ExplanationCard from '../components/ExplanationCard'
 import SkeletonCard from '../components/SkeletonCard'
 import RAGRating from '../components/RAGRating'
 import AttemptBanner from '../components/AttemptBanner'
+import QuizCard from '../components/QuizCard'
 
 const STYLE_ORDER = ['analogy', 'story', 'steps', 'eli5', 'expert']
 
@@ -32,6 +33,13 @@ export default function Learn() {
   const [showQuiz, setShowQuiz] = useState(false)
   const [allStylesExhausted, setAllStylesExhausted] = useState(false)
 
+  // quiz state
+  const [questions, setQuestions] = useState([])
+  const [quizLoading, setQuizLoading] = useState(false)
+  const [quizScore, setQuizScore] = useState(null)
+  const [quizComplete, setQuizComplete] = useState(false)
+  const [numQuestions, setNumQuestions] = useState(3)
+
   // load user on mount
   useEffect(() => {
     async function loadUser() {
@@ -55,7 +63,7 @@ export default function Learn() {
     loadUser()
   }, [navigate])
 
-  // reset all state for a new topic
+  // reset everything for a new topic
   function resetAll() {
     setExplanation(null)
     setRagDone(false)
@@ -67,9 +75,13 @@ export default function Learn() {
     setError('')
     setSessionId(null)
     setExplanationId(null)
+    setQuestions([])
+    setQuizLoading(false)
+    setQuizScore(null)
+    setQuizComplete(false)
   }
 
-  // core explain function — used for first attempt and re-explains
+  // core explain function
   async function handleExplain(topic, style, attemptNum, used) {
     setCurrentTopic(topic)
     setLoading(true)
@@ -79,6 +91,9 @@ export default function Learn() {
     setShowStylePicker(false)
     setShowQuiz(false)
     setAllStylesExhausted(false)
+    setQuestions([])
+    setQuizComplete(false)
+    setQuizScore(null)
 
     try {
       const res = await fetch('http://localhost:5000/api/explain', {
@@ -109,13 +124,13 @@ export default function Learn() {
     }
   }
 
-  // called when user submits topic for first time
+  // first explanation from topic input
   function handleFirstExplain(topic) {
     const used = [selectedStyle]
     handleExplain(topic, selectedStyle, 1, used)
   }
 
-  // called when user rates Red or Amber
+  // RAG rating handler
   async function handleRag(rating) {
     setRagDone(true)
 
@@ -130,9 +145,9 @@ export default function Learn() {
     }
 
     if (rating === 'green') {
-      setShowQuiz(true)
+      setShowQuiz(false) //dont show quiz yet
+    
     } else {
-      // check styles remaining
       const remaining = STYLE_ORDER.filter(s => !usedStyles.includes(s))
       if (remaining.length === 0) {
         setAllStylesExhausted(true)
@@ -142,13 +157,56 @@ export default function Learn() {
     }
   }
 
-  // called when user picks a style from the style picker
+  // user picks a style after Red/Amber
   function handleStylePick(style) {
     setShowStylePicker(false)
     const newUsed = [...usedStyles, style]
     const newAttempt = attempt + 1
     setSelectedStyle(style)
     handleExplain(currentTopic, style, newAttempt, newUsed)
+  }
+
+  // fetch quiz questions from backend
+  async function fetchQuiz() {
+    if (!explanation) return
+    setQuizLoading(true)
+
+    try {
+      const res = await fetch('http://localhost:5000/api/quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          explanation_text: explanation,
+          num_questions: numQuestions,
+          education_level: user?.preferences?.education_level,
+        })
+      })
+      const data = await res.json()
+
+      if (res.ok && data.questions.length > 0) {
+        setQuestions(data.questions)
+      } else {
+        setQuestions([])
+      }
+    } catch {
+      setQuestions([])
+    } finally {
+      setQuizLoading(false)
+    }
+  }
+
+  // quiz completed with a score
+  function handleQuizComplete(score) {
+    setQuizScore(score)
+    setQuizComplete(true)
+  }
+
+  // quiz skipped
+  function handleQuizSkip() {
+    setShowQuiz(true)
+    setQuizScore(null)
+    setQuizComplete(true)
   }
 
   return (
@@ -167,31 +225,32 @@ export default function Learn() {
 
       <div className="learn-content">
 
-        {/* Topic input — only show before explanation loads */}
+        {/* Topic input — only before explanation loads */}
         {!explanation && !loading && (
-          <div className="learn-input-section">
-            <StyleSelector
-              selected={selectedStyle}
-              onSelect={setSelectedStyle}
-            />
-            <TopicInput
-              onSubmit={handleFirstExplain}
-              loading={loading}
-            />
-          </div>
-        )}
+  <div className="learn-input-section">
+    <StyleSelector
+      selected={selectedStyle}
+      onSelect={setSelectedStyle}
+    />
+    
+    <TopicInput
+      onSubmit={handleFirstExplain}
+      loading={loading}
+    />
+  </div>
+)}
 
-        {/* Try different topic button — show after explanation loads */}
+        {/* Try different topic button */}
         {(explanation || loading) && (
           <button className="new-topic-btn" onClick={resetAll}>
             ← Try a different topic
           </button>
         )}
 
-        {/* Error message */}
+        {/* Error */}
         {error && <p className="auth-error">{error}</p>}
 
-        {/* Attempt banner — shown on re-explains */}
+        {/* Attempt banner */}
         {attempt > 1 && (
           <AttemptBanner attempt={attempt} style={selectedStyle} />
         )}
@@ -206,7 +265,7 @@ export default function Learn() {
           </div>
         )}
 
-        {/* Explanation card */}
+        {/* Explanation + everything after */}
         {explanation && !loading && (
           <>
             <ExplanationCard
@@ -215,12 +274,12 @@ export default function Learn() {
               attempt={attempt}
             />
 
-            {/* RAG rating — shown after explanation, hidden after rated */}
+            {/* RAG rating */}
             {!ragDone && (
               <RAGRating onRate={handleRag} disabled={false} />
             )}
 
-            {/* Style picker — shown after Red/Amber */}
+            {/* Style picker after Red/Amber */}
             {showStylePicker && (
               <div className="style-picker-wrap">
                 <p className="style-picker-label">
@@ -240,7 +299,7 @@ export default function Learn() {
               </div>
             )}
 
-            {/* All styles exhausted message */}
+            {/* All styles exhausted */}
             {allStylesExhausted && (
               <div className="exhausted-message">
                 <h3>You've tried every explanation style for this topic.</h3>
@@ -258,11 +317,118 @@ export default function Learn() {
               </div>
             )}
 
-            {/* Quiz placeholder — shown after Green */}
-            {showQuiz && (
-              <div className="quiz-placeholder">
-                <h3>Quiz coming next! 🎯</h3>
-                <p>Quiz component loads here — building it next.</p>
+            {/* Question count picker — shown after Green, before quiz loads */}
+{ragDone && !showQuiz && !showStylePicker && !allStylesExhausted && (
+  <div className="question-count">
+    <p className="style-label">How many questions do you want?</p>
+    <div className="question-count-options">
+      {[1, 2, 3, 5].map(n => (
+        <button
+          key={n}
+          className={`question-count-btn ${numQuestions === n ? 'question-count-active' : ''}`}
+          onClick={() => setNumQuestions(n)}
+        >
+          {n}
+        </button>
+      ))}
+    </div>
+    <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+  <button
+    className="btn-primary"
+    style={{ width: 'auto' }}
+    onClick={() => { setShowQuiz(true); fetchQuiz() }}
+  >
+    Start quiz →
+  </button>
+  <button
+  className="btn-ghost"
+  style={{ width: 'auto' }}
+  onClick={() => {
+    setShowQuiz(true)
+    setQuizScore(null)
+    setQuizComplete(true)
+  }}
+>
+  Skip quiz
+</button>
+</div>
+  </div>
+)}
+
+{/* Quiz section */}
+{showQuiz && (
+  <div className="quiz-wrap">
+
+                {/* Loading questions */}
+                {quizLoading && (
+                  <div className="quiz-loading">
+                    <p>Generating quiz questions...</p>
+                    <SkeletonCard />
+                  </div>
+                )}
+
+                {/* Questions */}
+                {!quizLoading && questions.length > 0 && !quizComplete && (
+                  <QuizCard
+                    questions={questions}
+                    onComplete={handleQuizComplete}
+                    onSkip={handleQuizSkip}
+                  />
+                )}
+
+                {/* Quiz failed to load */}
+                {!quizLoading && questions.length === 0 && !quizComplete && (
+                  <div className="quiz-unavailable">
+                    <p>Quiz unavailable for this explanation.</p>
+                    <button
+                      className="btn-primary"
+                      style={{ width: 'auto' }}
+                      onClick={handleQuizSkip}
+                    >
+                      Continue anyway →
+                    </button>
+                  </div>
+                )}
+
+                {/* Score screen */}
+                {quizComplete && (
+                  <div className="quiz-complete">
+                    {quizScore !== null ? (
+                      <>
+                        <h3>
+                          {quizScore >= 80 ? '🎉' : quizScore >= 60 ? '👍' : '💪'}{' '}
+                          You scored {quizScore}%
+                        </h3>
+                        <p>
+                          {quizScore >= 80
+                            ? 'Excellent — you really understood that.'
+                            : quizScore >= 60
+                            ? 'Good — you got the main ideas.'
+                            : "Don't worry — try a different explanation style."}
+                        </p>
+                      </>
+                    ) : (
+                      <h3>Quiz skipped</h3>
+                    )}
+                    <div className="quiz-complete-actions">
+                      <button
+                        className="btn-primary"
+                        style={{ width: 'auto' }}
+                        onClick={resetAll}
+                      >
+                        Learn another topic →
+                      </button>
+                      <button
+                        className="btn-ghost"
+                        style={{ width: 'auto' }}
+                        onClick={() => navigate('/dashboard')}
+                      >
+                        Back to dashboard
+                      </button>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
           </>
