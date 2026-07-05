@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
 import Learn from './pages/Learn'
+import Settings from './pages/Settings'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/learn" element={<Learn />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

@@ -1,34 +1,36 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-// helper — how long ago was a date
 function timeAgo(isoString) {
   if (!isoString) return ''
   const diff = Date.now() - new Date(isoString).getTime()
   const minutes = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
+  if (minutes < 2) return 'just now'
   if (minutes < 60) return `${minutes}m ago`
   if (hours < 24) return `${hours}h ago`
   return `${days}d ago`
 }
 
-// RAG dot colour
-function RagDot({ rating }) {
-  const colours = {
-    green: '#0F6E56',
-    amber: '#854F0B',
-    red: '#993C1D',
+function RagPill({ rating }) {
+  const map = {
+    green: { bg: 'var(--greensoft)', color: 'var(--green)', label: 'Got it' },
+    amber: { bg: 'var(--ambersoft)', color: 'var(--amber)', label: 'Partially' },
+    red:   { bg: 'var(--redsoft)',   color: 'var(--red)',   label: "Didn't get it" },
   }
+  const s = map[rating]
+  if (!s) return null
   return (
     <span style={{
-      display: 'inline-block',
-      width: 10,
-      height: 10,
-      borderRadius: '50%',
-      background: colours[rating] || '#DDDDDD',
-      marginRight: 6,
-    }} />
+      display: 'inline-flex', alignItems: 'center', gap: 5,
+      padding: '4px 10px', borderRadius: 99,
+      background: s.bg, color: s.color,
+      fontWeight: 700, fontSize: 12,
+    }}>
+      <span style={{ width: 7, height: 7, borderRadius: '50%', background: s.color, display: 'inline-block' }} />
+      {s.label}
+    </span>
   )
 }
 
@@ -38,55 +40,55 @@ export default function Dashboard() {
   const [sessions, setSessions] = useState([])
   const [weeklyStats, setWeeklyStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [recentIdx, setRecentIdx] = useState(0)
 
   useEffect(() => {
-    async function loadDashboard() {
+    async function load() {
       try {
-        // fetch user
-        const userRes = await fetch('http://localhost:5000/api/auth/me', {
-          credentials: 'include'
-        })
-        if (!userRes.ok) {
-          navigate('/login')
-          return
-        }
+        const userRes = await fetch('http://localhost:5000/api/auth/me', { credentials: 'include' })
+        if (!userRes.ok) { navigate('/login'); return }
         const userData = await userRes.json()
         setUser(userData.user)
 
-        // fetch recent sessions
-        const sessionsRes = await fetch('http://localhost:5000/api/sessions', {
-          credentials: 'include'
-        })
-        if (sessionsRes.ok) {
-          const sessionsData = await sessionsRes.json()
-          setSessions(sessionsData.sessions)
+        const sessRes = await fetch('http://localhost:5000/api/sessions', { credentials: 'include' })
+        if (sessRes.ok) {
+          const sessData = await sessRes.json()
+          setSessions(sessData.sessions || [])
         }
 
-        // fetch weekly stats
-        const statsRes = await fetch('http://localhost:5000/api/sessions/stats', {
-          credentials: 'include'
-        })
+        const statsRes = await fetch('http://localhost:5000/api/sessions/stats', { credentials: 'include' })
         if (statsRes.ok) {
           const statsData = await statsRes.json()
           setWeeklyStats(statsData)
         }
-
-      } catch {
-        navigate('/login')
-      } finally {
-        setLoading(false)
-      }
+      } catch { navigate('/login') }
+      finally { setLoading(false) }
     }
-
-    loadDashboard()
+    load()
   }, [navigate])
 
   async function handleLogout() {
-    await fetch('http://localhost:5000/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include'
-    })
+    await fetch('http://localhost:5000/api/auth/logout', { method: 'POST', credentials: 'include' })
     navigate('/login')
+  }
+
+  // Level calculation
+  const LEVELS = [
+    [0, 'Curious'], [100, 'Learner'], [300, 'Scholar'],
+    [700, 'Thinker'], [1500, 'Expert'], [3000, 'Master']
+  ]
+  function getLevel(xp) {
+    let level = LEVELS[0], next = LEVELS[1]
+    for (let i = 0; i < LEVELS.length; i++) {
+      if (xp >= LEVELS[i][0]) {
+        level = LEVELS[i]
+        next = LEVELS[i + 1] || null
+      }
+    }
+    const inLevel = next ? xp - level[0] : xp - level[0]
+    const toNext = next ? next[0] - level[0] : 1
+    const pct = next ? Math.round((inLevel / toNext) * 100) : 100
+    return { name: level[1], nextName: next ? next[1] : 'Max', inLevel, toNext, pct }
   }
 
   if (loading) return <div className="auth-loading">Loading your dashboard...</div>
@@ -95,6 +97,8 @@ export default function Dashboard() {
   const nickname = user.nickname || user.name
   const xp = user.stats?.xp || 0
   const streak = user.stats?.streak || 0
+  const level = getLevel(xp)
+  const activeSession = sessions[recentIdx] || null
 
   return (
     <div className="dashboard">
@@ -103,131 +107,198 @@ export default function Dashboard() {
       <nav className="navbar">
         <span className="navbar-logo">AdaptLearn</span>
         <div className="navbar-right">
-          {streak > 0 && (
-            <span className="streak-badge">🔥 {streak} day streak</span>
-          )}
+          {streak > 0 && <span className="streak-badge">🔥 {streak}-day streak</span>}
           <span className="xp-badge">⚡ {xp} XP</span>
           <span className="navbar-user">{nickname}</span>
-          <button className="btn-ghost-small" onClick={handleLogout}>
-            Log out
-          </button>
+          <button className="btn-ghost-small" onClick={handleLogout}>Log out</button>
         </div>
       </nav>
 
-      <div className="dashboard-content">
+      <div className="db-content">
 
-        {/* Greeting */}
-        <div className="dashboard-greeting">
-          <h1>Hey {nickname} 👋</h1>
-          <p className="greeting-sub">
-            Your default style is <strong>{user.preferences?.preferred_style || 'not set'}</strong>
-            {' '}— you can change this in settings anytime.
-          </p>
-        </div>
-
-        {/* Quick actions */}
-        <div className="dashboard-section">
-          <h2 className="section-title">What do you want to do?</h2>
-          <div className="action-grid">
-            <button className="action-card primary" onClick={() => navigate('/learn')}>
-              <span className="action-icon">🧠</span>
-              <div>
-                <span className="action-label">Learn a topic</span>
-                <span className="action-sub">Enter anything you want to understand</span>
-              </div>
+        {/* Header row */}
+        <div className="db-header">
+          <div>
+            <div className="db-welcome-label">Welcome back</div>
+            <h1 className="db-welcome-name">Hello, {nickname}.</h1>
+          </div>
+          <div className="db-header-actions">
+            <button className="btn-primary db-action-primary" onClick={() => navigate('/learn')}>
+              + New topic
             </button>
-
-            <button className="action-card" onClick={() => navigate('/courses/new')}>
-              <span className="action-icon">📚</span>
-              <div>
-                <span className="action-label">Build a course</span>
-                <span className="action-sub">Create a structured learning path</span>
-              </div>
-            </button>
-
-            <button className="action-card" onClick={() => navigate('/courses/new?import=true')}>
-              <span className="action-icon">📄</span>
-              <div>
-                <span className="action-label">Import a document</span>
-                <span className="action-sub">Turn a PDF or PPTX into a course</span>
-              </div>
+            <button className="btn-ghost db-action-ghost" onClick={() => navigate('/courses/new')}>
+              + Build a course
             </button>
           </div>
         </div>
 
-        {/* This week stats */}
-        {weeklyStats && (
-          <div className="dashboard-section">
-            <h2 className="section-title">This week</h2>
-            <div className="stats-row">
-              <div className="stat-card">
-                <span className="stat-number">{weeklyStats.total_this_week}</span>
-                <span className="stat-label">topics learned</span>
-              </div>
-              <div className="stat-card">
-                <span className="stat-number">
-                  {weeklyStats.avg_score !== null ? `${weeklyStats.avg_score}%` : '—'}
-                </span>
-                <span className="stat-label">avg quiz score</span>
-              </div>
-              <div className="stat-card">
-                <span className="stat-number">{weeklyStats.best_style || '—'}</span>
-                <span className="stat-label">best style</span>
-              </div>
-              <div className="stat-card">
-                <span className="stat-number">{xp}</span>
-                <span className="stat-label">total XP</span>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Two column grid */}
+        <div className="db-grid">
 
-        {/* Recent topics */}
-        <div className="dashboard-section">
-          <div className="section-header">
-            <h2 className="section-title">Recent topics</h2>
-            {sessions.length > 0 && (
-              <button
-                className="section-link"
-                onClick={() => navigate('/history')}
-              >
-                View all →
-              </button>
-            )}
-          </div>
+          {/* ── LEFT COLUMN ── */}
+          <div className="db-left">
 
-          {sessions.length === 0 ? (
-            <div className="empty-state">
-              <p>No sessions yet — learn your first topic to see it here.</p>
-              <button
-                className="btn-primary"
-                style={{ width: 'auto', marginTop: 12 }}
-                onClick={() => navigate('/learn')}
-              >
-                Learn something →
-              </button>
-            </div>
-          ) : (
-            <div className="sessions-list">
-              {sessions.map(s => (
-                <div key={s.id} className="session-row">
-                  <div className="session-info">
-                    <span className="session-topic">{s.topic}</span>
-                    <div className="session-meta">
-                      <span className="session-style">{s.style}</span>
-                      {s.rag_rating && <RagDot rating={s.rag_rating} />}
-                      {s.quiz_score !== null && (
-                        <span className="session-score">{s.quiz_score}%</span>
+            {/* Recent sessions */}
+            <div className="db-card">
+              <div className="db-card-header">
+                <div>
+                  <div className="db-card-title">Recent sessions</div>
+                  <div className="db-card-sub">Your last topics</div>
+                </div>
+                {sessions.length > 1 && (
+                  <div className="db-nav-btns">
+                    <button
+                      className="db-nav-btn"
+                      onClick={() => setRecentIdx(i => Math.max(0, i - 1))}
+                      disabled={recentIdx === 0}
+                    >‹</button>
+                    <button
+                      className="db-nav-btn"
+                      onClick={() => setRecentIdx(i => Math.min(sessions.length - 1, i + 1))}
+                      disabled={recentIdx === sessions.length - 1}
+                    >›</button>
+                  </div>
+                )}
+              </div>
+
+              {sessions.length === 0 ? (
+                <div className="db-empty">
+                  <p>No sessions yet.</p>
+                  <button className="btn-primary" style={{ width: 'auto', marginTop: 12 }} onClick={() => navigate('/learn')}>
+                    Learn your first topic →
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="db-session-card" key={activeSession?.id}>
+                    <div className="db-session-card-top">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span className="db-session-topic">{activeSession?.topic}</span>
+                        {activeSession?.style && (
+                          <span className="db-style-pill">{activeSession.style}</span>
+                        )}
+                      </div>
+                      <span className="db-session-time">{timeAgo(activeSession?.started_at)}</span>
+                    </div>
+                    <div className="db-session-meta">
+                      {activeSession?.rag_rating && <RagPill rating={activeSession.rag_rating} />}
+                      {activeSession?.quiz_score !== null && activeSession?.quiz_score !== undefined && (
+                        <span className="db-pill-neutral">Quiz {activeSession.quiz_score}%</span>
                       )}
                     </div>
+                    <button
+                      className="db-relearn-btn"
+                      onClick={() => navigate('/learn')}
+                    >
+                      Learn again →
+                    </button>
                   </div>
-                  <span className="session-time">{timeAgo(s.started_at)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
+                  {/* Dots */}
+                  {sessions.length > 1 && (
+                    <div className="db-dots">
+                      {sessions.map((_, i) => (
+                        <button
+                          key={i}
+                          className={`db-dot ${i === recentIdx ? 'db-dot-active' : ''}`}
+                          onClick={() => setRecentIdx(i)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Courses */}
+            <div className="db-card">
+              <div className="db-card-header">
+                <div className="db-card-title">Your courses</div>
+                <button className="section-link" onClick={() => navigate('/courses')}>View all</button>
+              </div>
+              <div className="db-empty" style={{ textAlign: 'left' }}>
+                <p style={{ color: 'var(--text3)', fontSize: 14 }}>No courses yet.</p>
+                <button
+                  className="btn-primary"
+                  style={{ width: 'auto', marginTop: 12 }}
+                  onClick={() => navigate('/courses/new')}
+                >
+                  Build your first course →
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ── RIGHT COLUMN ── */}
+          <div className="db-right">
+
+            {/* Streak + XP card */}
+            <div className="db-xp-card">
+              <div className="db-xp-row">
+                <div>
+                  <div className="db-xp-label">Current streak</div>
+                  <div className="db-xp-value">{streak} days</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="db-xp-label">Total XP</div>
+                  <div className="db-xp-value">{xp.toLocaleString()}</div>
+                </div>
+              </div>
+              <div className="db-level-row">
+                <span>{level.name}</span>
+                <span>{level.inLevel} / {level.toNext} to {level.nextName}</span>
+              </div>
+              <div className="db-level-bar">
+                <div className="db-level-fill" style={{ width: `${level.pct}%` }} />
+              </div>
+            </div>
+
+            {/* Quick stats */}
+            {weeklyStats && (
+              <div className="db-stats-grid">
+                <div className="db-stat">
+                  <div className="db-stat-num" style={{ color: 'var(--accent)' }}>
+                    {weeklyStats.total_this_week}
+                  </div>
+                  <div className="db-stat-label">this week</div>
+                </div>
+                <div className="db-stat">
+                  <div className="db-stat-num" style={{ color: 'var(--green)' }}>
+                    {weeklyStats.avg_score !== null ? `${weeklyStats.avg_score}%` : '—'}
+                  </div>
+                  <div className="db-stat-label">avg score</div>
+                </div>
+                <div className="db-stat">
+                  <div className="db-stat-num" style={{ color: 'var(--text)', fontSize: 18, paddingTop: 4 }}>
+                    {weeklyStats.best_style || '—'}
+                  </div>
+                  <div className="db-stat-label">top style</div>
+                </div>
+              </div>
+            )}
+
+            {/* Quick actions */}
+            <div className="db-card">
+              <div className="db-card-title" style={{ marginBottom: 14 }}>Quick actions</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                <button className="db-quick-btn" onClick={() => navigate('/learn')}>
+                  🧠 <span>Learn a topic</span>
+                </button>
+                <button className="db-quick-btn" onClick={() => navigate('/history')}>
+                  📋 <span>View history</span>
+                </button>
+                <button className="db-quick-btn" onClick={() => navigate('/bookmarks')}>
+                  🔖 <span>Bookmarks</span>
+                </button>
+                <button className="db-quick-btn" onClick={() => navigate('/settings')}>
+                  ⚙️ <span>Settings</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
     </div>
   )

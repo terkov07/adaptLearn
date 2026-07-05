@@ -6,6 +6,8 @@ from models import db, User
 import os
 from routes.auth import auth_bp
 from routes.sessions import sessions_bp
+from routes.user import user_bp
+
 
 
 load_dotenv()
@@ -123,6 +125,7 @@ def quiz():
     
 app.register_blueprint(auth_bp)
 app.register_blueprint(sessions_bp)
+app.register_blueprint(user_bp)
 
 if __name__ == '__main__':
     with app.app_context():
