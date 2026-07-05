@@ -7,12 +7,21 @@ import SkeletonCard from '../components/SkeletonCard'
 import RAGRating from '../components/RAGRating'
 import AttemptBanner from '../components/AttemptBanner'
 import QuizCard from '../components/QuizCard'
+import { useTheme } from '../context/ThemeContext'
 
 const STYLE_ORDER = ['analogy', 'story', 'steps', 'eli5', 'expert']
 
 export default function Learn() {
   const navigate = useNavigate()
 
+  //inside component 
+  const { theme, setTheme } = useTheme()
+  const THEMES = ['focus', 'night', 'calm', 'energy', 'contrast']
+
+function toggleTheme() {
+  const current = THEMES.indexOf(theme)
+  setTheme(THEMES[(current + 1) % THEMES.length])
+}
   // user
   const [user, setUser] = useState(null)
 
@@ -217,11 +226,15 @@ export default function Learn() {
         <button className="navbar-back" onClick={() => navigate('/dashboard')}>
           ← Dashboard
         </button>
+        <button onClick={toggleTheme} className="theme-toggle" title="Switch theme">
+  <div className="theme-toggle-icon" />
+</button>
         <span className="navbar-logo">AdaptLearn</span>
         <span className="navbar-user">
           {user?.nickname || user?.name || ''}
         </span>
       </nav>
+      
 
       <div className="learn-content">
 
