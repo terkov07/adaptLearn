@@ -1,10 +1,12 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from models import db, User
 import os
 from routes.auth import auth_bp
+from routes.sessions import sessions_bp
+
 
 load_dotenv()
 
@@ -29,13 +31,57 @@ def explain():
         return jsonify({'error': 'Topic is required'}), 400
     if not data.get('style'):
         return jsonify({'error': 'Style is required'}), 400
+
     topic = data['topic']
     style = data['style']
     education_level = data.get('education_level')
+    user_id = session.get('user_id')
+
     try:
         from services.claude_service import get_explanation
-        explanation = get_explanation(topic, style, education_level)
-        return jsonify({'explanation': explanation, 'style': style, 'topic': topic})
+        explanation_text = get_explanation(topic, style, education_level)
+
+        # save to database if logged in
+        session_id = None
+        explanation_id = None
+
+        if user_id:
+            from models import LearningSession, Explanation
+            from datetime import datetime
+
+            # create session
+            learning_session = LearningSession(
+                user_id=user_id,
+                topic=topic,
+                initial_style=style,
+                started_at=datetime.utcnow()
+            )
+            db.session.add(learning_session)
+            db.session.flush()
+
+            # create explanation
+            explanation_record = Explanation(
+                session_id=learning_session.id,
+                style=style,
+                prompt_sent=f"{education_level} | {style} | {topic}",
+                response_text=explanation_text,
+                attempt_number=1,
+                model_used='claude-haiku-4-5-20251001'
+            )
+            db.session.add(explanation_record)
+            db.session.commit()
+
+            session_id = learning_session.id
+            explanation_id = explanation_record.id
+
+        return jsonify({
+            'explanation': explanation_text,
+            'style': style,
+            'topic': topic,
+            'session_id': session_id,
+            'explanation_id': explanation_id,
+        })
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -55,6 +101,7 @@ def quiz():
         return jsonify({'error': str(e)}), 500
     
 app.register_blueprint(auth_bp)
+app.register_blueprint(sessions_bp)
 
 if __name__ == '__main__':
     with app.app_context():
