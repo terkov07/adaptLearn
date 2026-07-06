@@ -1,8 +1,9 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 
 export default function Navbar({ user, showBack, backTo, backLabel }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { theme, setTheme } = useTheme()
 
   const THEMES = ['focus', 'calm', 'energy', 'night', 'contrast']
@@ -12,46 +13,77 @@ export default function Navbar({ user, showBack, backTo, backLabel }) {
     setTheme(THEMES[(current + 1) % THEMES.length])
   }
 
-  const initial = (user?.nickname || user?.name || '?')[0].toUpperCase()
+  const nickname = user?.nickname || user?.name || ''
+  const initial = nickname[0]?.toUpperCase() || '?'
+  const xp = user?.stats?.xp || 0
+  const streak = user?.stats?.streak || 0
+
+  const NAV_LINKS = [
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Learn', path: '/learn' },
+    { label: 'Courses', path: '/courses' },
+    { label: 'History', path: '/history' },
+  ]
 
   return (
     <nav className="navbar">
-      <div className="navbar-left">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
         {showBack ? (
           <button
             className="navbar-back"
             onClick={() => navigate(backTo || '/dashboard')}
           >
-            ← {backLabel || 'Dashboard'}
+            ← {backLabel || 'Back'}
           </button>
         ) : (
           <span
             className="navbar-logo"
-            onClick={() => navigate('/dashboard')}
             style={{ cursor: 'pointer' }}
+            onClick={() => navigate('/dashboard')}
           >
             AdaptLearn
           </span>
         )}
+
+        <div className="db-nav-links">
+          {NAV_LINKS.map(link => (
+            <button
+              key={link.path}
+              className={`db-nav-link ${location.pathname === link.path ? 'db-nav-link-active' : ''}`}
+              onClick={() => navigate(link.path)}
+            >
+              {link.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {!showBack && (
-        <span className="navbar-logo" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-          AdaptLearn
-        </span>
-      )}
-
       <div className="navbar-right">
+        {streak > 0 && (
+          <span className="streak-badge">
+            <span style={{
+              width: 7, height: 7, borderRadius: '50%',
+              background: 'var(--amber)',
+              display: 'inline-block', marginRight: 5
+            }} />
+            {streak}-day streak
+          </span>
+        )}
+        {xp > 0 && (
+          <span className="xp-badge">{xp} XP</span>
+        )}
         <button className="theme-toggle" onClick={cycleTheme} title="Switch theme">
           <div className="theme-toggle-icon" />
         </button>
-        <button
-          className="navbar-avatar"
-          onClick={() => navigate('/settings')}
-          title="Profile & Settings"
-        >
-          {initial}
-        </button>
+        {nickname && (
+          <button
+            className="navbar-avatar"
+            onClick={() => navigate('/settings')}
+            title="Settings"
+          >
+            {initial}
+          </button>
+        )}
       </div>
     </nav>
   )
