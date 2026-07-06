@@ -8,6 +8,8 @@ import Learn from './pages/Learn'
 import Settings from './pages/Settings'
 import History from './pages/History'
 import SessionDetail from './pages/SessionDetail'
+import Bookmarks from './pages/Bookmarks'
+
 
 
 function App() {
@@ -24,6 +26,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/history" element={<History />} />
           <Route path="/history/:id" element={<SessionDetail />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

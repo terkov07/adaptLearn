@@ -1,55 +1,41 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ReactMarkdown from 'react-markdown'
 import TopicInput from '../components/TopicInput'
 import StyleSelector from '../components/StyleSelector'
-import ExplanationCard from '../components/ExplanationCard'
 import SkeletonCard from '../components/SkeletonCard'
 import RAGRating from '../components/RAGRating'
 import AttemptBanner from '../components/AttemptBanner'
 import QuizCard from '../components/QuizCard'
-import { useTheme } from '../context/ThemeContext'
 
 const STYLE_ORDER = ['analogy', 'story', 'steps', 'eli5', 'expert']
 
 export default function Learn() {
   const navigate = useNavigate()
 
-  //inside component 
-  const { theme, setTheme } = useTheme()
-  const THEMES = ['focus', 'night', 'calm', 'energy', 'contrast']
-
-function toggleTheme() {
-  const current = THEMES.indexOf(theme)
-  setTheme(THEMES[(current + 1) % THEMES.length])
-}
-  // user
   const [user, setUser] = useState(null)
-
-  // learn state
   const [selectedStyle, setSelectedStyle] = useState('analogy')
   const [loading, setLoading] = useState(false)
   const [explanation, setExplanation] = useState(null)
   const [currentTopic, setCurrentTopic] = useState('')
   const [attempt, setAttempt] = useState(1)
   const [usedStyles, setUsedStyles] = useState([])
-  const [sessionId, setSessionId] = useState(null)
   const [explanationId, setExplanationId] = useState(null)
   const [error, setError] = useState('')
+  const [isBookmarked, setIsBookmarked] = useState(false)
 
-  // post-explanation state
   const [ragDone, setRagDone] = useState(false)
   const [showStylePicker, setShowStylePicker] = useState(false)
+  const [showQuizPicker, setShowQuizPicker] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
   const [allStylesExhausted, setAllStylesExhausted] = useState(false)
 
-  // quiz state
+  const [numQuestions, setNumQuestions] = useState(3)
   const [questions, setQuestions] = useState([])
   const [quizLoading, setQuizLoading] = useState(false)
   const [quizScore, setQuizScore] = useState(null)
   const [quizComplete, setQuizComplete] = useState(false)
-  const [numQuestions, setNumQuestions] = useState(3)
 
-  // load user on mount
   useEffect(() => {
     async function loadUser() {
       try {
@@ -72,25 +58,24 @@ function toggleTheme() {
     loadUser()
   }, [navigate])
 
-  // reset everything for a new topic
   function resetAll() {
     setExplanation(null)
     setRagDone(false)
     setShowStylePicker(false)
+    setShowQuizPicker(false)
     setShowQuiz(false)
     setAttempt(1)
     setUsedStyles([])
     setAllStylesExhausted(false)
     setError('')
-    setSessionId(null)
     setExplanationId(null)
+    setIsBookmarked(false)
     setQuestions([])
     setQuizLoading(false)
     setQuizScore(null)
     setQuizComplete(false)
   }
 
-  // core explain function
   async function handleExplain(topic, style, attemptNum, used) {
     setCurrentTopic(topic)
     setLoading(true)
@@ -98,8 +83,10 @@ function toggleTheme() {
     setError('')
     setRagDone(false)
     setShowStylePicker(false)
+    setShowQuizPicker(false)
     setShowQuiz(false)
     setAllStylesExhausted(false)
+    setIsBookmarked(false)
     setQuestions([])
     setQuizComplete(false)
     setQuizScore(null)
@@ -119,7 +106,6 @@ function toggleTheme() {
 
       if (res.ok) {
         setExplanation(data.explanation)
-        setSessionId(data.session_id)
         setExplanationId(data.explanation_id)
         setAttempt(attemptNum)
         setUsedStyles(used)
@@ -133,17 +119,14 @@ function toggleTheme() {
     }
   }
 
-  // first explanation from topic input
   function handleFirstExplain(topic) {
     const used = [selectedStyle]
     handleExplain(topic, selectedStyle, 1, used)
   }
 
-  // RAG rating handler
   async function handleRag(rating) {
     setRagDone(true)
 
-    // save rating to backend
     if (explanationId) {
       await fetch(`http://localhost:5000/api/explanations/${explanationId}/rag`, {
         method: 'PATCH',
@@ -154,8 +137,7 @@ function toggleTheme() {
     }
 
     if (rating === 'green') {
-      setShowQuiz(false) //dont show quiz yet
-    
+      setShowQuizPicker(true)
     } else {
       const remaining = STYLE_ORDER.filter(s => !usedStyles.includes(s))
       if (remaining.length === 0) {
@@ -166,7 +148,6 @@ function toggleTheme() {
     }
   }
 
-  // user picks a style after Red/Amber
   function handleStylePick(style) {
     setShowStylePicker(false)
     const newUsed = [...usedStyles, style]
@@ -175,11 +156,9 @@ function toggleTheme() {
     handleExplain(currentTopic, style, newAttempt, newUsed)
   }
 
-  // fetch quiz questions from backend
   async function fetchQuiz() {
     if (!explanation) return
     setQuizLoading(true)
-
     try {
       const res = await fetch('http://localhost:5000/api/quiz', {
         method: 'POST',
@@ -192,7 +171,6 @@ function toggleTheme() {
         })
       })
       const data = await res.json()
-
       if (res.ok && data.questions.length > 0) {
         setQuestions(data.questions)
       } else {
@@ -205,70 +183,77 @@ function toggleTheme() {
     }
   }
 
-  // quiz completed with a score
   function handleQuizComplete(score) {
     setQuizScore(score)
     setQuizComplete(true)
   }
 
-  // quiz skipped
   function handleQuizSkip() {
     setShowQuiz(true)
     setQuizScore(null)
     setQuizComplete(true)
   }
 
+  async function handleBookmark() {
+    if (!explanationId || isBookmarked) return
+    try {
+      const res = await fetch('http://localhost:5000/api/bookmarks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ explanation_id: explanationId })
+      })
+      if (res.ok || res.status === 409) {
+        setIsBookmarked(true)
+      }
+    } catch {
+      console.error('Bookmark failed')
+    }
+  }
+
   return (
     <div className="learn-page">
 
-      {/* Navbar */}
       <nav className="navbar">
         <button className="navbar-back" onClick={() => navigate('/dashboard')}>
           ← Dashboard
         </button>
-        <button onClick={toggleTheme} className="theme-toggle" title="Switch theme">
-  <div className="theme-toggle-icon" />
-</button>
         <span className="navbar-logo">AdaptLearn</span>
         <span className="navbar-user">
           {user?.nickname || user?.name || ''}
         </span>
       </nav>
-      
 
       <div className="learn-content">
 
-        {/* Topic input — only before explanation loads */}
+        {/* Input section */}
         {!explanation && !loading && (
-  <div className="learn-input-section">
-    <StyleSelector
-      selected={selectedStyle}
-      onSelect={setSelectedStyle}
-    />
-    
-    <TopicInput
-      onSubmit={handleFirstExplain}
-      loading={loading}
-    />
-  </div>
-)}
+          <div className="learn-input-section">
+            <StyleSelector
+              selected={selectedStyle}
+              onSelect={setSelectedStyle}
+            />
+            <TopicInput
+              onSubmit={handleFirstExplain}
+              loading={loading}
+            />
+          </div>
+        )}
 
-        {/* Try different topic button */}
+        {/* Try different topic */}
         {(explanation || loading) && (
           <button className="new-topic-btn" onClick={resetAll}>
             ← Try a different topic
           </button>
         )}
 
-        {/* Error */}
         {error && <p className="auth-error">{error}</p>}
 
-        {/* Attempt banner */}
         {attempt > 1 && (
           <AttemptBanner attempt={attempt} style={selectedStyle} />
         )}
 
-        {/* Loading skeleton */}
+        {/* Loading */}
         {loading && (
           <div>
             <p className="loading-text">
@@ -278,14 +263,26 @@ function toggleTheme() {
           </div>
         )}
 
-        {/* Explanation + everything after */}
+        {/* Explanation */}
         {explanation && !loading && (
           <>
-            <ExplanationCard
-              explanation={explanation}
-              style={selectedStyle}
-              attempt={attempt}
-            />
+            <div className="explanation-card">
+              <div className="explanation-header">
+                <span className="explanation-badge">{selectedStyle}</span>
+                {attempt > 1 && (
+                  <span className="attempt-badge">Attempt {attempt}</span>
+                )}
+                <button
+                  className={`bookmark-btn ${isBookmarked ? 'bookmark-btn-active' : ''}`}
+                  onClick={handleBookmark}
+                >
+                  🔖 <span>{isBookmarked ? 'Saved' : 'Save'}</span>
+                </button>
+              </div>
+              <div className="explanation-text">
+                <ReactMarkdown>{explanation}</ReactMarkdown>
+              </div>
+            </div>
 
             {/* RAG rating */}
             {!ragDone && (
@@ -330,49 +327,44 @@ function toggleTheme() {
               </div>
             )}
 
-            {/* Question count picker — shown after Green, before quiz loads */}
-{ragDone && !showQuiz && !showStylePicker && !allStylesExhausted && (
-  <div className="question-count">
-    <p className="style-label">How many questions do you want?</p>
-    <div className="question-count-options">
-      {[1, 2, 3, 5].map(n => (
-        <button
-          key={n}
-          className={`question-count-btn ${numQuestions === n ? 'question-count-active' : ''}`}
-          onClick={() => setNumQuestions(n)}
-        >
-          {n}
-        </button>
-      ))}
-    </div>
-    <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-  <button
-    className="btn-primary"
-    style={{ width: 'auto' }}
-    onClick={() => { setShowQuiz(true); fetchQuiz() }}
-  >
-    Start quiz →
-  </button>
-  <button
-  className="btn-ghost"
-  style={{ width: 'auto' }}
-  onClick={() => {
-    setShowQuiz(true)
-    setQuizScore(null)
-    setQuizComplete(true)
-  }}
->
-  Skip quiz
-</button>
-</div>
-  </div>
-)}
+            {/* Quiz question count picker */}
+            {showQuizPicker && !showQuiz && (
+              <div className="rag-wrap">
+                <p className="rag-label">How many quiz questions?</p>
+                <div className="question-count-options" style={{ marginBottom: 14 }}>
+                  {[1, 2, 3, 5].map(n => (
+                    <button
+                      key={n}
+                      className={`question-count-btn ${numQuestions === n ? 'question-count-active' : ''}`}
+                      onClick={() => setNumQuestions(n)}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    className="btn-primary"
+                    style={{ width: 'auto' }}
+                    onClick={() => { setShowQuiz(true); fetchQuiz() }}
+                  >
+                    Start quiz →
+                  </button>
+                  <button
+                    className="btn-ghost"
+                    style={{ width: 'auto' }}
+                    onClick={handleQuizSkip}
+                  >
+                    Skip quiz
+                  </button>
+                </div>
+              </div>
+            )}
 
-{/* Quiz section */}
-{showQuiz && (
-  <div className="quiz-wrap">
+            {/* Quiz section */}
+            {showQuiz && (
+              <div className="quiz-wrap">
 
-                {/* Loading questions */}
                 {quizLoading && (
                   <div className="quiz-loading">
                     <p>Generating quiz questions...</p>
@@ -380,7 +372,6 @@ function toggleTheme() {
                   </div>
                 )}
 
-                {/* Questions */}
                 {!quizLoading && questions.length > 0 && !quizComplete && (
                   <QuizCard
                     questions={questions}
@@ -390,7 +381,6 @@ function toggleTheme() {
                   />
                 )}
 
-                {/* Quiz failed to load */}
                 {!quizLoading && questions.length === 0 && !quizComplete && (
                   <div className="quiz-unavailable">
                     <p>Quiz unavailable for this explanation.</p>
@@ -404,7 +394,6 @@ function toggleTheme() {
                   </div>
                 )}
 
-                {/* Score screen */}
                 {quizComplete && (
                   <div className="quiz-complete">
                     {quizScore !== null ? (

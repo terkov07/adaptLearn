@@ -7,6 +7,8 @@ import os
 from routes.auth import auth_bp
 from routes.sessions import sessions_bp
 from routes.user import user_bp
+from routes.bookmarks import bookmarks_bp
+
 
 
 
@@ -193,6 +195,7 @@ def submit_quiz():
 app.register_blueprint(auth_bp)
 app.register_blueprint(sessions_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(bookmarks_bp)
 
 if __name__ == '__main__':
     with app.app_context():
