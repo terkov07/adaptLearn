@@ -101,11 +101,19 @@ export default function History() {
     }
   }
 
+  const [user, setUser] = useState(null)
+  useEffect(() => {
+  fetch('http://localhost:5000/api/auth/me', { credentials: 'include' })
+    .then(r => r.json())
+    .then(d => setUser(d.user))
+    .catch(() => {})
+}, []) 
+
   return (
     <div className="history-page">
 
       {/* Navbar */}
-     <Navbar showBack backTo="/dashboard" backLabel="Dashboard" />
+     <Navbar user={user} />
 
       <div className="history-content">
         <h1 className="settings-title">Learning History</h1>

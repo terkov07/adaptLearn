@@ -9,7 +9,7 @@ from routes.sessions import sessions_bp
 from routes.user import user_bp
 from routes.bookmarks import bookmarks_bp
 from routes.courses import courses_bp
-
+from datetime import date, timedelta
 
 
 load_dotenv()
@@ -179,6 +179,24 @@ def submit_quiz():
                     user_stats.xp += xp_earned
                     user_stats.total_sessions += 1
                     user_stats.total_topics += 1
+                
+                # after updating user_stats xp
+
+
+                if user_stats:
+                    user_stats.xp += xp_earned
+                    user_stats.total_sessions += 1
+                    user_stats.total_topics += 1
+
+    # update streak
+                today = date.today()
+                last = user_stats.last_active.date() if user_stats.last_active else None
+                if last is None or last < today - timedelta(days=1):
+                    user_stats.streak = 1
+                elif last == today - timedelta(days=1):
+                    user_stats.streak += 1
+                # if last == today, streak stays same — already counted
+                user_stats.last_active = __import__('datetime').datetime.utcnow()
 
         db.session.commit()
 
@@ -188,6 +206,7 @@ def submit_quiz():
             'total': len(questions),
             'xp_earned': xp_earned if questions else 5
         })
+
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

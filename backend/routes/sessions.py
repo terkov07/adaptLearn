@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from models import db, LearningSession, Explanation, QuizResult
 from sqlalchemy import desc
+from models import Explanation
 
 import re
 
@@ -25,7 +26,7 @@ def get_sessions():
     rag_filter = request.args.get('rag')
     search = request.args.get('search', '').strip()
     page = int(request.args.get('page', 1))
-    per_page = 10
+    per_page = 5
 
     query = LearningSession.query.filter_by(user_id=user_id)
 
@@ -132,23 +133,23 @@ def get_weekly_stats():
     weekly = LearningSession.query.filter(
         LearningSession.user_id == user_id,
         LearningSession.started_at >= week_ago,
-        LearningSession.completed_at != None
     ).all()
 
     total = len(weekly)
+
+    # avg quiz score from sessions that have one
     scores = [s.final_quiz_score for s in weekly if s.final_quiz_score is not None]
     avg_score = round(sum(scores) / len(scores)) if scores else None
 
-    style_scores = {}
+    # best style — by green RAG ratings across all explanations this week
+    style_greens = {}
     for s in weekly:
-        if s.final_style and s.final_quiz_score:
-            if s.final_style not in style_scores:
-                style_scores[s.final_style] = []
-            style_scores[s.final_style].append(s.final_quiz_score)
+        exps = Explanation.query.filter_by(session_id=s.id).all()
+        for exp in exps:
+            if exp.rag_rating == 'green' and exp.style:
+                style_greens[exp.style] = style_greens.get(exp.style, 0) + 1
 
-    best_style = None
-    if style_scores:
-        best_style = max(style_scores, key=lambda k: sum(style_scores[k]) / len(style_scores[k]))
+    best_style = max(style_greens, key=style_greens.get) if style_greens else None
 
     return jsonify({
         'total_this_week': total,

@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 
+
+
+
+
 function timeAgo(isoString) {
   if (!isoString) return ''
   const diff = Date.now() - new Date(isoString).getTime()
@@ -65,6 +69,7 @@ export default function Dashboard() {
   const [bookmarks, setBookmarks] = useState([])
   const [loading, setLoading] = useState(true)
   const [recentIdx, setRecentIdx] = useState(0)
+  const [courses, setCourses] = useState([])
 
   const THEMES = ['focus', 'calm', 'energy', 'night', 'contrast']
   function cycleTheme() {
@@ -75,11 +80,12 @@ export default function Dashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const [userRes, sessRes, statsRes, bmRes] = await Promise.all([
+        const [userRes, sessRes, statsRes, bmRes, coursesRes] = await Promise.all([
           fetch('http://localhost:5000/api/auth/me', { credentials: 'include' }),
           fetch('http://localhost:5000/api/sessions', { credentials: 'include' }),
           fetch('http://localhost:5000/api/sessions/stats', { credentials: 'include' }),
           fetch('http://localhost:5000/api/bookmarks', { credentials: 'include' }),
+          fetch('http://localhost:5000/api/courses', { credentials: 'include' }),
         ])
 
         if (!userRes.ok) { navigate('/login'); return }
@@ -88,9 +94,9 @@ export default function Dashboard() {
         setUser(userData.user)
 
         if (sessRes.ok) {
-          const d = await sessRes.json()
-          setSessions(d.sessions || [])
-        }
+  const d = await sessRes.json()
+  setSessions((d.sessions || []).slice(0, 5))
+}
         if (statsRes.ok) {
           const d = await statsRes.json()
           setWeeklyStats(d)
@@ -99,6 +105,10 @@ export default function Dashboard() {
           const d = await bmRes.json()
           setBookmarks((d.bookmarks || []).slice(0, 3))
         }
+        if (coursesRes.ok) {
+          const d = await coursesRes.json()
+          setCourses(d.courses || [])
+}
       } catch { navigate('/login') }
       finally { setLoading(false) }
     }
@@ -268,23 +278,59 @@ export default function Dashboard() {
             </div>
 
             {/* Courses */}
-            <div className="db-card">
-              <div className="db-card-header">
-                <div className="db-card-title">Your courses</div>
-                <button className="section-link" onClick={() => navigate('/courses')}>View all</button>
-              </div>
-              <div className="db-empty" style={{ textAlign: 'left' }}>
-                <p style={{ color: 'var(--text3)', fontSize: 14 }}>No courses yet.</p>
-                <button
-                  className="btn-primary"
-                  style={{ width: 'auto', marginTop: 12 }}
-                  onClick={() => navigate('/courses/new')}
-                >
-                  Build your first course →
-                </button>
-              </div>
-            </div>
+<div className="db-card">
+  <div className="db-card-header">
+    <div className="db-card-title">Your courses</div>
+    <button className="section-link" onClick={() => navigate('/courses')}>View all</button>
+  </div>
 
+  {courses.length === 0 ? (
+    <div className="db-empty" style={{ textAlign: 'left' }}>
+      <p style={{ color: 'var(--text3)', fontSize: 14 }}>No courses yet.</p>
+      <button
+        className="btn-primary"
+        style={{ width: 'auto', marginTop: 12 }}
+        onClick={() => navigate('/courses/new')}
+      >
+        Build your first course →
+      </button>
+    </div>
+  ) : (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {courses.slice(0, 3).map(c => (
+        <div
+          key={c.id}
+          className="db-bookmark-item"
+          onClick={() => navigate(`/courses/${c.id}`)}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>
+              {c.title}
+            </span>
+            <span style={{
+              fontWeight: 700, fontSize: 13,
+              color: c.progress_pct === 100 ? 'var(--green)' : 'var(--accent)'
+            }}>
+              {c.progress_pct}%
+            </span>
+          </div>
+          <div style={{ height: 5, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
+            <div style={{
+              height: '100%',
+              width: `${c.progress_pct}%`,
+              background: c.progress_pct === 100 ? 'var(--green)' : 'var(--accent)',
+              borderRadius: 99,
+              transition: 'width 0.3s ease'
+            }} />
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 5 }}>
+            {c.completed_topics} of {c.total_topics} topics
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
           </div>
 
           {/* RIGHT */}

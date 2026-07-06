@@ -223,7 +223,7 @@ export default function Learn() {
   return (
     <div className="learn-page">
 
-      <Navbar user={user} showBack backTo="/dashboard" backLabel="Dashboard" />
+      <Navbar user={user} />
 
       <div className="learn-content">
 

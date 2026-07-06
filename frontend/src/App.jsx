@@ -31,7 +31,6 @@ function App() {
           <Route path="/history" element={<History />} />
           <Route path="/history/:id" element={<SessionDetail />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
-          <Route path="/" element={<Landing />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/new" element={<CourseBuilder />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
