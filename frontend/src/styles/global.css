@@ -2892,3 +2892,88 @@ body {
 @media (max-width: 640px) {
   .bookmarks-grid { grid-template-columns: 1fr; }
 }
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accentsoft);
+  color: var(--accent);
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  border: 2px solid var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.navbar-avatar:hover {
+  background: var(--accent);
+  color: var(--onaccent);
+  transform: scale(1.05);
+}
+
+/* ── Dashboard nav links ── */
+.db-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.db-nav-link {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text2);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  transition: background 0.15s, color 0.15s;
+}
+
+.db-nav-link:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.db-nav-link-active {
+  background: var(--accentsoft);
+  color: var(--accent);
+}
+
+/* ── Session preview ── */
+.db-session-preview {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text2);
+  margin-bottom: 12px;
+  max-height: 80px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent);
+  mask-image: linear-gradient(180deg, #000 50%, transparent);
+}
+
+/* ── Bookmark item ── */
+.db-bookmark-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.db-bookmark-item:hover {
+  border-color: var(--accent);
+  background: var(--accentsoft);
+}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import QuizCard from '../components/QuizCard'
 import ReactMarkdown from 'react-markdown'
+import Navbar from '../components/Navbar'
 
 function RagPill({ rating }) {
   const map = {
@@ -87,13 +88,7 @@ export default function SessionDetail() {
   return (
     <div className="learn-page">
 
-      <nav className="navbar">
-        <button className="navbar-back" onClick={() => navigate('/history')}>
-          ← History
-        </button>
-        <span className="navbar-logo">AdaptLearn</span>
-        <span />
-      </nav>
+   <Navbar showBack backTo="/dashboard" backLabel="Dashboard" />  
 
       <div className="learn-content">
 

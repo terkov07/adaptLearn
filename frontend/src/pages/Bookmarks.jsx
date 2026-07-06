@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
+import Navbar from '../components/Navbar'
 
 function timeAgo(isoString) {
   if (!isoString) return ''
@@ -100,14 +101,7 @@ export default function Bookmarks() {
   return (
     <div className="bookmarks-page">
 
-      <nav className="navbar">
-        <button className="navbar-back" onClick={() => navigate('/dashboard')}>
-          ← Dashboard
-        </button>
-        <span className="navbar-logo">AdaptLearn</span>
-        <span />
-      </nav>
-
+      <Navbar showBack backTo="/dashboard" backLabel="Dashboard" />
       <div className="bookmarks-content">
         <h1 className="settings-title">Saved Explanations</h1>
 

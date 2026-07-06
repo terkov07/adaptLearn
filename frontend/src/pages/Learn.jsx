@@ -7,6 +7,7 @@ import SkeletonCard from '../components/SkeletonCard'
 import RAGRating from '../components/RAGRating'
 import AttemptBanner from '../components/AttemptBanner'
 import QuizCard from '../components/QuizCard'
+import Navbar from '../components/Navbar'
 
 const STYLE_ORDER = ['analogy', 'story', 'steps', 'eli5', 'expert']
 
@@ -222,15 +223,7 @@ export default function Learn() {
   return (
     <div className="learn-page">
 
-      <nav className="navbar">
-        <button className="navbar-back" onClick={() => navigate('/dashboard')}>
-          ← Dashboard
-        </button>
-        <span className="navbar-logo">AdaptLearn</span>
-        <span className="navbar-user">
-          {user?.nickname || user?.name || ''}
-        </span>
-      </nav>
+      <Navbar user={user} showBack backTo="/dashboard" backLabel="Dashboard" />
 
       <div className="learn-content">
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
+import Navbar from '../components/Navbar'
 
 const STYLES = [
   { value: 'analogy',  label: 'Analogy',      desc: 'Compare to something familiar' },
@@ -177,13 +178,7 @@ export default function Settings() {
     <div className="settings-page">
 
       {/* Navbar */}
-      <nav className="navbar">
-        <button className="navbar-back" onClick={() => navigate('/dashboard')}>
-          ← Dashboard
-        </button>
-        <span className="navbar-logo">AdaptLearn</span>
-        <span className="navbar-user">{user?.nickname || user?.name}</span>
-      </nav>
+      <Navbar user={user} showBack backTo="/dashboard" backLabel="Dashboard" />
 
       <div className="settings-content">
         <h1 className="settings-title">Settings</h1>

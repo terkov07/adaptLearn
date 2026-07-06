@@ -2,6 +2,16 @@ from flask import Blueprint, request, jsonify, session
 from models import db, LearningSession, Explanation, QuizResult
 from sqlalchemy import desc
 
+import re
+
+def strip_markdown(text):
+    if not text:
+        return ''
+    text = re.sub(r'#{1,6}\s*', '', text)
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
+    text = re.sub(r'\*(.*?)\*', r'\1', text)
+    text = re.sub(r'\n+', ' ', text)
+    return text.strip()
 sessions_bp = Blueprint('sessions', __name__)
 
 @sessions_bp.route('/api/sessions', methods=['GET'])
@@ -20,7 +30,12 @@ def get_sessions():
     query = LearningSession.query.filter_by(user_id=user_id)
 
     if style_filter:
-        query = query.filter(LearningSession.final_style == style_filter)
+        query = query.filter(
+            db.or_(
+                LearningSession.final_style == style_filter,
+                LearningSession.initial_style == style_filter
+            )
+        )
     if search:
         query = query.filter(LearningSession.topic.ilike(f'%{search}%'))
 
@@ -51,7 +66,7 @@ def get_sessions():
             'xp_earned': s.xp_earned,
             'started_at': s.started_at.isoformat() if s.started_at else None,
             'completed_at': s.completed_at.isoformat() if s.completed_at else None,
-            'explanation_preview': final_exp.response_text[:150] if final_exp else None,
+            'explanation_preview': strip_markdown(final_exp.response_text)[:150] if final_exp else None,
         })
 
     return jsonify({

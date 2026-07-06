@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTheme } from '../context/ThemeContext'
 
 function timeAgo(isoString) {
   if (!isoString) return ''
@@ -10,14 +11,15 @@ function timeAgo(isoString) {
   if (minutes < 2) return 'just now'
   if (minutes < 60) return `${minutes}m ago`
   if (hours < 24) return `${hours}h ago`
+  if (days === 1) return 'Yesterday'
   return `${days}d ago`
 }
 
 function RagPill({ rating }) {
   const map = {
-    green: { bg: 'var(--greensoft)', color: 'var(--green)', label: 'Got it' },
-    amber: { bg: 'var(--ambersoft)', color: 'var(--amber)', label: 'Partially' },
-    red:   { bg: 'var(--redsoft)',   color: 'var(--red)',   label: "Didn't get it" },
+    green: { bg: 'var(--greensoft)', color: 'var(--green)', label: 'Green' },
+    amber: { bg: 'var(--ambersoft)', color: 'var(--amber)', label: 'Amber' },
+    red:   { bg: 'var(--redsoft)',   color: 'var(--red)',   label: 'Red' },
   }
   const s = map[rating]
   if (!s) return null
@@ -34,32 +36,68 @@ function RagPill({ rating }) {
   )
 }
 
+const LEVELS = [
+  [0, 'Curious'], [100, 'Learner'], [300, 'Scholar'],
+  [700, 'Thinker'], [1500, 'Expert'], [3000, 'Master']
+]
+
+function getLevel(xp) {
+  let level = LEVELS[0], next = LEVELS[1]
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (xp >= LEVELS[i][0]) {
+      level = LEVELS[i]
+      next = LEVELS[i + 1] || null
+    }
+  }
+  const inLevel = xp - level[0]
+  const toNext = next ? next[0] - level[0] : 1
+  const pct = next ? Math.round((inLevel / toNext) * 100) : 100
+  return { name: level[1], nextName: next ? next[1] : 'Max', inLevel, toNext, pct }
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
+  const { theme, setTheme } = useTheme()
+
   const [user, setUser] = useState(null)
   const [sessions, setSessions] = useState([])
   const [weeklyStats, setWeeklyStats] = useState(null)
+  const [bookmarks, setBookmarks] = useState([])
   const [loading, setLoading] = useState(true)
   const [recentIdx, setRecentIdx] = useState(0)
+
+  const THEMES = ['focus', 'calm', 'energy', 'night', 'contrast']
+  function cycleTheme() {
+    const current = THEMES.indexOf(theme)
+    setTheme(THEMES[(current + 1) % THEMES.length])
+  }
 
   useEffect(() => {
     async function load() {
       try {
-        const userRes = await fetch('http://localhost:5000/api/auth/me', { credentials: 'include' })
+        const [userRes, sessRes, statsRes, bmRes] = await Promise.all([
+          fetch('http://localhost:5000/api/auth/me', { credentials: 'include' }),
+          fetch('http://localhost:5000/api/sessions', { credentials: 'include' }),
+          fetch('http://localhost:5000/api/sessions/stats', { credentials: 'include' }),
+          fetch('http://localhost:5000/api/bookmarks', { credentials: 'include' }),
+        ])
+
         if (!userRes.ok) { navigate('/login'); return }
+
         const userData = await userRes.json()
         setUser(userData.user)
 
-        const sessRes = await fetch('http://localhost:5000/api/sessions', { credentials: 'include' })
         if (sessRes.ok) {
-          const sessData = await sessRes.json()
-          setSessions(sessData.sessions || [])
+          const d = await sessRes.json()
+          setSessions(d.sessions || [])
         }
-
-        const statsRes = await fetch('http://localhost:5000/api/sessions/stats', { credentials: 'include' })
         if (statsRes.ok) {
-          const statsData = await statsRes.json()
-          setWeeklyStats(statsData)
+          const d = await statsRes.json()
+          setWeeklyStats(d)
+        }
+        if (bmRes.ok) {
+          const d = await bmRes.json()
+          setBookmarks((d.bookmarks || []).slice(0, 3))
         }
       } catch { navigate('/login') }
       finally { setLoading(false) }
@@ -72,29 +110,11 @@ export default function Dashboard() {
     navigate('/login')
   }
 
-  // Level calculation
-  const LEVELS = [
-    [0, 'Curious'], [100, 'Learner'], [300, 'Scholar'],
-    [700, 'Thinker'], [1500, 'Expert'], [3000, 'Master']
-  ]
-  function getLevel(xp) {
-    let level = LEVELS[0], next = LEVELS[1]
-    for (let i = 0; i < LEVELS.length; i++) {
-      if (xp >= LEVELS[i][0]) {
-        level = LEVELS[i]
-        next = LEVELS[i + 1] || null
-      }
-    }
-    const inLevel = next ? xp - level[0] : xp - level[0]
-    const toNext = next ? next[0] - level[0] : 1
-    const pct = next ? Math.round((inLevel / toNext) * 100) : 100
-    return { name: level[1], nextName: next ? next[1] : 'Max', inLevel, toNext, pct }
-  }
-
   if (loading) return <div className="auth-loading">Loading your dashboard...</div>
   if (!user) return null
 
   const nickname = user.nickname || user.name
+  const initial = nickname[0].toUpperCase()
   const xp = user.stats?.xp || 0
   const streak = user.stats?.streak || 0
   const level = getLevel(xp)
@@ -103,20 +123,44 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
 
-      {/* Navbar */}
+      {/* ── Navbar ── */}
       <nav className="navbar">
-        <span className="navbar-logo">AdaptLearn</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+          <span className="navbar-logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
+            AdaptLearn
+          </span>
+          <div className="db-nav-links">
+            <button className="db-nav-link db-nav-link-active" onClick={() => navigate('/dashboard')}>Dashboard</button>
+            <button className="db-nav-link" onClick={() => navigate('/learn')}>Learn</button>
+            <button className="db-nav-link" onClick={() => navigate('/courses')}>Courses</button>
+            <button className="db-nav-link" onClick={() => navigate('/history')}>History</button>
+          </div>
+        </div>
         <div className="navbar-right">
-          {streak > 0 && <span className="streak-badge">🔥 {streak}-day streak</span>}
-          <span className="xp-badge">⚡ {xp} XP</span>
-          <span className="navbar-user">{nickname}</span>
+          {streak > 0 && (
+            <span className="streak-badge">
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--amber)', display: 'inline-block', marginRight: 5 }} />
+              {streak}-day streak
+            </span>
+          )}
+          <span className="xp-badge">{xp.toLocaleString()} XP</span>
+          <button className="theme-toggle" onClick={cycleTheme} title="Switch theme">
+            <div className="theme-toggle-icon" />
+          </button>
+          <button
+            className="navbar-avatar"
+            onClick={() => navigate('/settings')}
+            title="Profile & Settings"
+          >
+            {initial}
+          </button>
           <button className="btn-ghost-small" onClick={handleLogout}>Log out</button>
         </div>
       </nav>
 
       <div className="db-content">
 
-        {/* Header row */}
+        {/* ── Header row ── */}
         <div className="db-header">
           <div>
             <div className="db-welcome-label">Welcome back</div>
@@ -132,10 +176,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Two column grid */}
+        {/* ── Two column grid ── */}
         <div className="db-grid">
 
-          {/* ── LEFT COLUMN ── */}
+          {/* LEFT */}
           <div className="db-left">
 
             {/* Recent sessions */}
@@ -143,7 +187,7 @@ export default function Dashboard() {
               <div className="db-card-header">
                 <div>
                   <div className="db-card-title">Recent sessions</div>
-                  <div className="db-card-sub">Your last topics</div>
+                  <div className="db-card-sub">Swipe through your last topics</div>
                 </div>
                 {sessions.length > 1 && (
                   <div className="db-nav-btns">
@@ -164,7 +208,11 @@ export default function Dashboard() {
               {sessions.length === 0 ? (
                 <div className="db-empty">
                   <p>No sessions yet.</p>
-                  <button className="btn-primary" style={{ width: 'auto', marginTop: 12 }} onClick={() => navigate('/learn')}>
+                  <button
+                    className="btn-primary"
+                    style={{ width: 'auto', marginTop: 12 }}
+                    onClick={() => navigate('/learn')}
+                  >
                     Learn your first topic →
                   </button>
                 </div>
@@ -172,7 +220,7 @@ export default function Dashboard() {
                 <>
                   <div className="db-session-card" key={activeSession?.id}>
                     <div className="db-session-card-top">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                         <span className="db-session-topic">{activeSession?.topic}</span>
                         {activeSession?.style && (
                           <span className="db-style-pill">{activeSession.style}</span>
@@ -180,21 +228,30 @@ export default function Dashboard() {
                       </div>
                       <span className="db-session-time">{timeAgo(activeSession?.started_at)}</span>
                     </div>
+
+                    {activeSession?.explanation_preview && (
+                      <div className="db-session-preview">
+                        {activeSession.explanation_preview}...
+                      </div>
+                    )}
+
                     <div className="db-session-meta">
                       {activeSession?.rag_rating && <RagPill rating={activeSession.rag_rating} />}
                       {activeSession?.quiz_score !== null && activeSession?.quiz_score !== undefined && (
                         <span className="db-pill-neutral">Quiz {activeSession.quiz_score}%</span>
                       )}
+                      {activeSession?.total_attempts > 1 && (
+                        <span className="db-pill-neutral">{activeSession.total_attempts} attempt(s)</span>
+                      )}
+                      <button
+                        className="db-relearn-btn"
+                        onClick={() => navigate('/learn')}
+                      >
+                        Relearn
+                      </button>
                     </div>
-                    <button
-                      className="db-relearn-btn"
-                      onClick={() => navigate('/learn')}
-                    >
-                      Learn again →
-                    </button>
                   </div>
 
-                  {/* Dots */}
                   {sessions.length > 1 && (
                     <div className="db-dots">
                       {sessions.map((_, i) => (
@@ -230,7 +287,7 @@ export default function Dashboard() {
 
           </div>
 
-          {/* ── RIGHT COLUMN ── */}
+          {/* RIGHT */}
           <div className="db-right">
 
             {/* Streak + XP card */}
@@ -254,7 +311,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick stats */}
+            {/* Stats grid */}
             {weeklyStats && (
               <div className="db-stats-grid">
                 <div className="db-stat">
@@ -267,10 +324,10 @@ export default function Dashboard() {
                   <div className="db-stat-num" style={{ color: 'var(--green)' }}>
                     {weeklyStats.avg_score !== null ? `${weeklyStats.avg_score}%` : '—'}
                   </div>
-                  <div className="db-stat-label">avg score</div>
+                  <div className="db-stat-label">best quiz</div>
                 </div>
                 <div className="db-stat">
-                  <div className="db-stat-num" style={{ color: 'var(--text)', fontSize: 18, paddingTop: 4 }}>
+                  <div className="db-stat-num" style={{ color: 'var(--text)', fontSize: 17, paddingTop: 5 }}>
                     {weeklyStats.best_style || '—'}
                   </div>
                   <div className="db-stat-label">top style</div>
@@ -278,23 +335,37 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Quick actions */}
+            {/* Bookmarks */}
             <div className="db-card">
-              <div className="db-card-title" style={{ marginBottom: 14 }}>Quick actions</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-                <button className="db-quick-btn" onClick={() => navigate('/learn')}>
-                  🧠 <span>Learn a topic</span>
-                </button>
-                <button className="db-quick-btn" onClick={() => navigate('/history')}>
-                  📋 <span>View history</span>
-                </button>
-                <button className="db-quick-btn" onClick={() => navigate('/bookmarks')}>
-                  🔖 <span>Bookmarks</span>
-                </button>
-                <button className="db-quick-btn" onClick={() => navigate('/settings')}>
-                  ⚙️ <span>Settings</span>
-                </button>
+              <div className="db-card-header">
+                <div className="db-card-title">Bookmarks</div>
+                <button className="section-link" onClick={() => navigate('/bookmarks')}>View all</button>
               </div>
+              {bookmarks.length === 0 ? (
+                <div className="db-empty" style={{ textAlign: 'left' }}>
+                  <p style={{ color: 'var(--text3)', fontSize: 14 }}>No bookmarks yet.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {bookmarks.map(b => (
+                    <div
+                      key={b.id}
+                      className="db-bookmark-item"
+                      onClick={() => navigate('/bookmarks')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>
+                          {b.topic}
+                        </span>
+                        {b.style && <span className="db-style-pill">{b.style}</span>}
+                      </div>
+                      <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.4 }}>
+                        {b.text_preview?.slice(0, 80)}...
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
           </div>
