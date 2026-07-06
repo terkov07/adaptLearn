@@ -9,6 +9,8 @@ import Settings from './pages/Settings'
 import History from './pages/History'
 import SessionDetail from './pages/SessionDetail'
 import Bookmarks from './pages/Bookmarks'
+import Landing from './pages/Landing'
+
 
 
 
@@ -17,7 +19,7 @@ function App() {
     <ThemeProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
@@ -27,6 +29,7 @@ function App() {
           <Route path="/history" element={<History />} />
           <Route path="/history/:id" element={<SessionDetail />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/" element={<Landing />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
