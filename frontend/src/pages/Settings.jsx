@@ -1,7 +1,9 @@
+import API_URL from '../api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import Navbar from '../components/Navbar'
+
 
 const STYLES = [
   { value: 'analogy',  label: 'Analogy',      desc: 'Compare to something familiar' },
@@ -58,7 +60,7 @@ export default function Settings() {
   useEffect(() => {
     async function loadUser() {
       try {
-        const res = await fetch('http://localhost:5000/api/auth/me', {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
           credentials: 'include'
         })
         if (!res.ok) { navigate('/login'); return }
@@ -84,7 +86,7 @@ export default function Settings() {
   async function saveProfile() {
     setSaving(true)
     try {
-      const res = await fetch('http://localhost:5000/api/user/profile', {
+      const res = await fetch(`${API_URL}/api/user/profile`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -99,7 +101,7 @@ export default function Settings() {
   async function savePreferences() {
     setSaving(true)
     try {
-      const res = await fetch('http://localhost:5000/api/user/profile', {
+      const res = await fetch(`${API_URL}/api/user/profile`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -113,7 +115,7 @@ export default function Settings() {
 
   async function saveTheme(newTheme) {
     setTheme(newTheme)
-    await fetch('http://localhost:5000/api/user/profile', {
+    await fetch(`${API_URL}/api/user/profile`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -123,7 +125,7 @@ export default function Settings() {
 
   async function saveTextSize(size) {
     setTextSize(size)
-    await fetch('http://localhost:5000/api/user/profile', {
+    await fetch(`${API_URL}/api/user/profile`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -138,7 +140,7 @@ export default function Settings() {
 
     setSaving(true)
     try {
-      const res = await fetch('http://localhost:5000/api/user/password', {
+      const res = await fetch(`${API_URL}/api/user/password`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -161,7 +163,7 @@ export default function Settings() {
     if (deleteConfirm !== 'DELETE') return showMessage('Type DELETE to confirm', true)
 
     try {
-      const res = await fetch('http://localhost:5000/api/user', {
+      const res = await fetch(`${API_URL}/api/user`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

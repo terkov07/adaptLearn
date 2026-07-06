@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import Navbar from '../components/Navbar'
+import API_URL from '../api'
 
 function timeAgo(isoString) {
   if (!isoString) return ''
@@ -47,7 +48,7 @@ export default function Bookmarks() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('http://localhost:5000/api/bookmarks', {
+        const res = await fetch(`${API_URL}/api/bookmarks`, {
           credentials: 'include'
         })
         if (!res.ok) { navigate('/login'); return }
@@ -64,7 +65,7 @@ export default function Bookmarks() {
 
   async function deleteBookmark(bookmarkId) {
     try {
-      await fetch(`http://localhost:5000/api/bookmarks/${bookmarkId}`, {
+      await fetch(`${API_URL}/api/bookmarks/${bookmarkId}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -76,7 +77,7 @@ export default function Bookmarks() {
 
   async function saveNote(bookmarkId) {
     try {
-      await fetch(`http://localhost:5000/api/bookmarks/${bookmarkId}`, {
+      await fetch(`${API_URL}/api/bookmarks/${bookmarkId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

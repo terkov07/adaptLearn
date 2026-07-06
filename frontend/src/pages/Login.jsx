@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import API_URL from '../api'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ export default function Login() {
     setError('')
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -29,14 +30,13 @@ export default function Login() {
       } else {
         setError(data.error || 'Something went wrong')
       }
-    } catch (err) {
+    } catch {
       setError('Could not connect to server')
     } finally {
       setLoading(false)
     }
   }
 
-  // allow Enter key to submit
   function handleKeyDown(e) {
     if (e.key === 'Enter') handleLogin()
   }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
+import API_URL from '../api'
 
 // ─── Main CourseDetail page ───────────────────────────────────────────────────
 export default function CourseDetail() {
@@ -18,7 +19,7 @@ export default function CourseDetail() {
 useEffect(() => {
   async function load() {
     try {
-      const res = await fetch(`http://localhost:5000/api/courses/${id}`, {
+      const res = await fetch(`${API_URL}/api/courses/${id}`, {
         credentials: 'include'
       })
       if (!res.ok) { navigate('/courses'); return }
@@ -37,13 +38,13 @@ useEffect(() => {
 
   async function markTopicComplete(topicId) {
     try {
-      await fetch(`http://localhost:5000/api/courses/${id}/topics/${topicId}`, {
+      await fetch(`${API_URL}/api/courses/${id}/topics/${topicId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ status: 'complete' })
       })
-      const res = await fetch(`http://localhost:5000/api/courses/${id}`, {
+      const res = await fetch(`${API_URL}/api/courses/${id}`, {
         credentials: 'include'
       })
       const data = await res.json()
@@ -199,7 +200,7 @@ function CourseLearner({ topic, docText, onComplete }) {
     setAllExhausted(false)
 
     try {
-      const res = await fetch('http://localhost:5000/api/explain', {
+      const res = await fetch(`${API_URL}/api/explain`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -233,7 +234,7 @@ function CourseLearner({ topic, docText, onComplete }) {
   async function handleRag(rating) {
     setRagDone(true)
     if (explanationId) {
-      await fetch(`http://localhost:5000/api/explanations/${explanationId}/rag`, {
+      await fetch(`${API_URL}/api/explanations/${explanationId}/rag`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -262,7 +263,7 @@ function CourseLearner({ topic, docText, onComplete }) {
     if (!explanation) return
     setQuizLoading(true)
     try {
-      const res = await fetch('http://localhost:5000/api/quiz', {
+      const res = await fetch(`${API_URL}/api/quiz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -280,7 +281,7 @@ function CourseLearner({ topic, docText, onComplete }) {
   async function handleBookmark() {
     if (!explanationId || isBookmarked) return
     try {
-      await fetch('http://localhost:5000/api/bookmarks', {
+      await fetch(`${API_URL}/api/bookmarks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -533,7 +534,7 @@ function QuizCardInline({ questions, explanationId, onComplete, onSkip }) {
 
     if (currentIndex >= questions.length - 1) {
       if (explanationId) {
-        fetch('http://localhost:5000/api/quiz/submit', {
+        fetch(`${API_URL}/api/quiz/submit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

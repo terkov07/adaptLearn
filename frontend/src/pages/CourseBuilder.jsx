@@ -1,5 +1,7 @@
+import API_URL from '../api'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 
 const LEVELS = ['GCSE', 'A-Level', 'University', 'Beginner', 'Expert']
 
@@ -39,7 +41,7 @@ export default function CourseBuilder() {
     formData.append('file', file)
 
     try {
-      const res = await fetch('http://localhost:5000/api/extract', {
+      const res = await fetch(`${API_URL}/api/extract`, {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -83,7 +85,7 @@ export default function CourseBuilder() {
     setError('')
 
     try {
-      const res = await fetch('http://localhost:5000/api/courses', {
+      const res = await fetch(`${API_URL}/api/courses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

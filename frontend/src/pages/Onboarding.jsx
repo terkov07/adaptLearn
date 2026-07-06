@@ -1,3 +1,5 @@
+import API_URL from '../api'
+
 const QUESTIONS = [
   {
     id: 'q1',
@@ -94,7 +96,7 @@ export default function Onboarding() {
   async function submitAnswers(finalAnswers) {
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:5000/api/auth/onboarding', {
+      const res = await fetch(`${API_URL}/api/auth/onboarding`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',  // sends session cookie

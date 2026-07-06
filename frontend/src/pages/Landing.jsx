@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 
+
 const STYLES = [
   { icon: '🔗', name: 'Analogy', desc: 'Connect new ideas to things you already know' },
   { icon: '📖', name: 'Story', desc: 'Learn through narrative and characters' },

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import QuizCard from '../components/QuizCard'
 import ReactMarkdown from 'react-markdown'
 import Navbar from '../components/Navbar'
+import API_URL from '../api'
 
 function RagPill({ rating }) {
   const map = {
@@ -45,7 +46,7 @@ export default function SessionDetail() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`http://localhost:5000/api/sessions/${id}`, {
+        const res = await fetch(`${API_URL}/api/sessions/${id}`, {
           credentials: 'include'
         })
         if (!res.ok) { navigate('/history'); return }
@@ -65,7 +66,7 @@ export default function SessionDetail() {
   setRegenScore(null)
 
   try {
-    const res = await fetch('http://localhost:5000/api/quiz', {
+    const res = await fetch(`${API_URL}/api/quiz`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

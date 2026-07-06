@@ -1,3 +1,4 @@
+import API_URL from '../api'
 import { useState } from 'react'
 
 export default function QuizCard({ questions, onComplete, onSkip, explanationId }) {
@@ -34,7 +35,7 @@ export default function QuizCard({ questions, onComplete, onSkip, explanationId 
 
   // save to database
   if (explanationId) {
-    fetch('http://localhost:5000/api/quiz/submit', {
+    fetch(`${API_URL}/api/quiz/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

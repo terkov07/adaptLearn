@@ -8,6 +8,7 @@ import RAGRating from '../components/RAGRating'
 import AttemptBanner from '../components/AttemptBanner'
 import QuizCard from '../components/QuizCard'
 import Navbar from '../components/Navbar'
+import API_URL from '../api'
 
 const STYLE_ORDER = ['analogy', 'story', 'steps', 'eli5', 'expert']
 
@@ -43,7 +44,7 @@ export default function Learn() {
   useEffect(() => {
     async function loadUser() {
       try {
-        const res = await fetch('http://localhost:5000/api/auth/me', {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
           credentials: 'include'
         })
         if (res.ok) {
@@ -98,7 +99,7 @@ export default function Learn() {
     setQuizScore(null)
 
     try {
-      const res = await fetch('http://localhost:5000/api/explain', {
+      const res = await fetch(`${API_URL}/api/explain`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -134,7 +135,7 @@ export default function Learn() {
   setRagDone(true)
 
   if (explanationId) {
-    await fetch(`http://localhost:5000/api/explanations/${explanationId}/rag`, {
+    await fetch(`${API_URL}/api/explanations/${explanationId}/rag`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -169,7 +170,7 @@ export default function Learn() {
     if (!explanation) return
     setQuizLoading(true)
     try {
-      const res = await fetch('http://localhost:5000/api/quiz', {
+      const res = await fetch(`${API_URL}/api/quiz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -206,7 +207,7 @@ export default function Learn() {
   async function handleBookmark() {
     if (!explanationId || isBookmarked) return
     try {
-      const res = await fetch('http://localhost:5000/api/bookmarks', {
+      const res = await fetch(`${API_URL}/api/bookmarks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

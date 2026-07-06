@@ -1,5 +1,7 @@
+import API_URL from '../api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 
 export default function Courses() {
   const navigate = useNavigate()
@@ -11,8 +13,8 @@ export default function Courses() {
     async function load() {
       try {
         const [userRes, coursesRes] = await Promise.all([
-          fetch('http://localhost:5000/api/auth/me', { credentials: 'include' }),
-          fetch('http://localhost:5000/api/courses', { credentials: 'include' }),
+          fetch(`${API_URL}/api/auth/me`, { credentials: 'include' }),
+          fetch(`${API_URL}/api/courses`, { credentials: 'include' }),
         ])
         if (!userRes.ok) { navigate('/login'); return }
         const userData = await userRes.json()

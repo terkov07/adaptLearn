@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import Navbar from '../components/Navbar'
+import API_URL from '../api'
 
 function timeAgo(isoString) {
   if (!isoString) return ''
@@ -65,7 +66,7 @@ export default function History() {
       if (ragFilter) params.append('rag', ragFilter)
 
       const res = await fetch(
-        `http://localhost:5000/api/sessions?${params}`,
+        `${API_URL}/api/sessions?${params}`,
         { credentials: 'include' }
       )
       if (!res.ok) { navigate('/login'); return }
@@ -88,7 +89,7 @@ export default function History() {
     if (!expandedData[sessionId]) {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/sessions/${sessionId}`,
+          `${API_URL}/api/sessions/${sessionId}`,
           { credentials: 'include' }
         )
         if (res.ok) {
@@ -103,7 +104,7 @@ export default function History() {
 
   const [user, setUser] = useState(null)
   useEffect(() => {
-  fetch('http://localhost:5000/api/auth/me', { credentials: 'include' })
+  fetch(`${API_URL}/api/auth/me`, { credentials: 'include' })
     .then(r => r.json())
     .then(d => setUser(d.user))
     .catch(() => {})
