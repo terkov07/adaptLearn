@@ -29,12 +29,15 @@ export default function Learn() {
   const [showQuizPicker, setShowQuizPicker] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
   const [allStylesExhausted, setAllStylesExhausted] = useState(false)
+  const [showAmberChoice, setShowAmberChoice] = useState(false)
 
   const [numQuestions, setNumQuestions] = useState(3)
   const [questions, setQuestions] = useState([])
   const [quizLoading, setQuizLoading] = useState(false)
   const [quizScore, setQuizScore] = useState(null)
   const [quizComplete, setQuizComplete] = useState(false)
+  const [showPostQuizOptions ]= useState(false)
+  const [postQuizRag, setPostQuizRag] = useState(null)
 
   useEffect(() => {
     async function loadUser() {
@@ -60,6 +63,7 @@ export default function Learn() {
 
   function resetAll() {
     setExplanation(null)
+    setShowAmberChoice(false)
     setRagDone(false)
     setShowStylePicker(false)
     setShowQuizPicker(false)
@@ -78,6 +82,7 @@ export default function Learn() {
 
   async function handleExplain(topic, style, attemptNum, used) {
     setCurrentTopic(topic)
+    setShowAmberChoice(false)
     setLoading(true)
     setExplanation(null)
     setError('')
@@ -125,28 +130,31 @@ export default function Learn() {
   }
 
   async function handleRag(rating) {
-    setRagDone(true)
+  setRagDone(true)
 
-    if (explanationId) {
-      await fetch(`http://localhost:5000/api/explanations/${explanationId}/rag`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ rating })
-      })
-    }
+  if (explanationId) {
+    await fetch(`http://localhost:5000/api/explanations/${explanationId}/rag`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ rating })
+    })
+  }
 
-    if (rating === 'green') {
-      setShowQuizPicker(true)
+  if (rating === 'green') {
+    setShowQuizPicker(true)
+  } else if (rating === 'amber') {
+    setShowAmberChoice(true)  // new — show choice
+  } else {
+    // red — go straight to style picker
+    const remaining = STYLE_ORDER.filter(s => !usedStyles.includes(s))
+    if (remaining.length === 0) {
+      setAllStylesExhausted(true)
     } else {
-      const remaining = STYLE_ORDER.filter(s => !usedStyles.includes(s))
-      if (remaining.length === 0) {
-        setAllStylesExhausted(true)
-      } else {
-        setShowStylePicker(true)
-      }
+      setShowStylePicker(true)
     }
   }
+}
 
   function handleStylePick(style) {
     setShowStylePicker(false)
@@ -288,6 +296,39 @@ export default function Learn() {
             {!ragDone && (
               <RAGRating onRate={handleRag} disabled={false} />
             )}
+            {/* Amber choice — quiz or re-explain */}
+{showAmberChoice && (
+  <div className="rag-wrap">
+    <p className="rag-label">You partially got it — what would you like to do?</p>
+    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+      <button
+        className="btn-primary"
+        style={{ width: 'auto' }}
+        onClick={() => {
+          setShowAmberChoice(false)
+          setShowQuizPicker(true)
+        }}
+      >
+        Test what I understood →
+      </button>
+      <button
+        className="btn-ghost"
+        style={{ width: 'auto' }}
+        onClick={() => {
+          setShowAmberChoice(false)
+          const remaining = STYLE_ORDER.filter(s => !usedStyles.includes(s))
+          if (remaining.length === 0) {
+            setAllStylesExhausted(true)
+          } else {
+            setShowStylePicker(true)
+          }
+        }}
+      >
+        Try a different explanation
+      </button>
+    </div>
+  </div>
+)}
 
             {/* Style picker after Red/Amber */}
             {showStylePicker && (
@@ -394,44 +435,169 @@ export default function Learn() {
                   </div>
                 )}
 
-                {quizComplete && (
-                  <div className="quiz-complete">
-                    {quizScore !== null ? (
-                      <>
-                        <h3>
-                          {quizScore >= 80 ? '🎉' : quizScore >= 60 ? '👍' : '💪'}{' '}
-                          You scored {quizScore}%
-                        </h3>
-                        <p>
-                          {quizScore >= 80
-                            ? 'Excellent — you really understood that.'
-                            : quizScore >= 60
-                            ? 'Good — you got the main ideas.'
-                            : "Don't worry — try a different explanation style."}
-                        </p>
-                      </>
-                    ) : (
-                      <h3>Quiz skipped</h3>
-                    )}
-                    <div className="quiz-complete-actions">
-                      <button
-                        className="btn-primary"
-                        style={{ width: 'auto' }}
-                        onClick={resetAll}
-                      >
-                        Learn another topic →
-                      </button>
-                      <button
-                        className="btn-ghost"
-                        style={{ width: 'auto' }}
-                        onClick={() => navigate('/dashboard')}
-                      >
-                        Back to dashboard
-                      </button>
-                    </div>
-                  </div>
-                )}
+               {quizComplete && (
+  <div className="quiz-complete">
+    {quizScore !== null ? (
+      <>
+        <h3>
+          {quizScore >= 80 ? '🎉' : quizScore >= 60 ? '👍' : '💪'}{' '}
+          You scored {quizScore}%
+        </h3>
+        <p>
+          {quizScore >= 80
+            ? 'Excellent — you really understood that.'
+            : quizScore >= 60
+            ? 'Good — you got the main ideas.'
+            : "Looks like some parts didn't quite click yet."}
+        </p>
+      </>
+    ) : (
+      <h3>Quiz skipped</h3>
+    )}
 
+    {/* High score — simple actions */}
+    {(quizScore === null || quizScore >= 80) && (
+      <div className="quiz-complete-actions">
+        <button
+          className="btn-primary"
+          style={{ width: 'auto' }}
+          onClick={resetAll}
+        >
+          Learn another topic →
+        </button>
+        <button
+          className="btn-ghost"
+          style={{ width: 'auto' }}
+          onClick={() => navigate('/dashboard')}
+        >
+          Back to dashboard
+        </button>
+      </div>
+    )}
+
+    {/* Low score — ask how they feel now */}
+    {quizScore !== null && quizScore < 80 && !showPostQuizOptions && (
+      <div style={{ marginTop: 16 }}>
+        <p className="rag-label">How do you feel about this topic now?</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
+          <button
+            className="rag-btn rag-green"
+            onClick={() => setPostQuizRag('green')}
+          >
+            🟢 I get it now
+          </button>
+          <button
+            className="rag-btn rag-amber"
+            onClick={() => setPostQuizRag('amber')}
+          >
+            🟡 Still partially
+          </button>
+          <button
+            className="rag-btn rag-red"
+            onClick={() => setPostQuizRag('red')}
+          >
+            🔴 Still didn't click
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* Green — they get it now */}
+    {postQuizRag === 'green' && (
+      <div className="quiz-complete-actions" style={{ marginTop: 16 }}>
+        <button
+          className="btn-primary"
+          style={{ width: 'auto' }}
+          onClick={resetAll}
+        >
+          Learn another topic →
+        </button>
+        <button
+          className="btn-ghost"
+          style={{ width: 'auto' }}
+          onClick={() => navigate('/dashboard')}
+        >
+          Back to dashboard
+        </button>
+      </div>
+    )}
+
+    {/* Amber — still partial */}
+    {postQuizRag === 'amber' && (
+      <div className="quiz-complete-actions" style={{ marginTop: 16 }}>
+        <button
+          className="btn-primary"
+          style={{ width: 'auto' }}
+          onClick={() => {
+            setQuizComplete(false)
+            setQuizScore(null)
+            setPostQuizRag(null)
+          }}
+        >
+          Retry quiz
+        </button>
+        <button
+          className="btn-ghost"
+          style={{ width: 'auto' }}
+          onClick={() => {
+            setShowQuiz(false)
+            setShowQuizPicker(false)
+            setQuizComplete(false)
+            setQuizScore(null)
+            setPostQuizRag(null)
+            setRagDone(false)
+            setShowStylePicker(true)
+          }}
+        >
+          Try different explanation
+        </button>
+        <button
+          className="btn-ghost"
+          style={{ width: 'auto' }}
+          onClick={resetAll}
+        >
+          New topic
+        </button>
+      </div>
+    )}
+
+    {/* Red — still didn't click */}
+    {postQuizRag === 'red' && (
+      <div className="quiz-complete-actions" style={{ marginTop: 16 }}>
+        <button
+          className="btn-primary"
+          style={{ width: 'auto' }}
+          onClick={() => {
+            setShowQuiz(false)
+            setShowQuizPicker(false)
+            setQuizComplete(false)
+            setQuizScore(null)
+            setPostQuizRag(null)
+            setRagDone(false)
+            setShowStylePicker(true)
+          }}
+        >
+          Try different explanation
+        </button>
+        <button
+          className="btn-ghost"
+          style={{ width: 'auto' }}
+          onClick={resetAll}
+        >
+          New topic
+        </button>
+        <button
+          className="btn-ghost"
+          style={{ width: 'auto' }}
+          onClick={() => navigate('/dashboard')}
+        >
+          Back to dashboard
+        </button>
+      </div>
+    )}
+
+  </div>
+)}
               </div>
             )}
           </>
