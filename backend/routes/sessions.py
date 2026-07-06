@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, session
-from models import db, LearningSession, Explanation, User
+from flask import Blueprint, request, jsonify, session
+from models import db, LearningSession, Explanation, QuizResult
+from sqlalchemy import desc
 
 sessions_bp = Blueprint('sessions', __name__)
 
@@ -9,34 +10,99 @@ def get_sessions():
     if not user_id:
         return jsonify({'error': 'Not logged in'}), 401
 
-    # get last 5 completed sessions
-    recent = LearningSession.query.filter_by(
-        user_id=user_id
-    ).order_by(
-        LearningSession.started_at.desc()
-    ).limit(5).all()
+    # filters from query params
+    style_filter = request.args.get('style')
+    rag_filter = request.args.get('rag')
+    search = request.args.get('search', '').strip()
+    page = int(request.args.get('page', 1))
+    per_page = 10
 
-    sessions_data = []
-    for s in recent:
-        # get the final explanation for this session
-        final_explanation = Explanation.query.filter_by(
+    query = LearningSession.query.filter_by(user_id=user_id)
+
+    if style_filter:
+        query = query.filter(LearningSession.final_style == style_filter)
+    if search:
+        query = query.filter(LearningSession.topic.ilike(f'%{search}%'))
+
+    query = query.order_by(desc(LearningSession.started_at))
+    total = query.count()
+    sessions_list = query.offset((page - 1) * per_page).limit(per_page).all()
+
+    results = []
+    for s in sessions_list:
+        # get final explanation and its RAG rating
+        final_exp = Explanation.query.filter_by(
             session_id=s.id
-        ).order_by(
-            Explanation.attempt_number.desc()
-        ).first()
+        ).order_by(desc(Explanation.attempt_number)).first()
 
-        sessions_data.append({
+        rag = final_exp.rag_rating if final_exp else None
+
+        # filter by RAG if requested
+        if rag_filter and rag != rag_filter:
+            continue
+
+        results.append({
             'id': s.id,
             'topic': s.topic,
             'style': s.final_style or s.initial_style,
-            'rag_rating': final_explanation.rag_rating if final_explanation else None,
+            'rag_rating': rag,
             'quiz_score': s.final_quiz_score,
+            'total_attempts': s.total_attempts,
             'xp_earned': s.xp_earned,
             'started_at': s.started_at.isoformat() if s.started_at else None,
             'completed_at': s.completed_at.isoformat() if s.completed_at else None,
+            'explanation_preview': final_exp.response_text[:150] if final_exp else None,
         })
 
-    return jsonify({'sessions': sessions_data})
+    return jsonify({
+        'sessions': results,
+        'total': total,
+        'page': page,
+        'per_page': per_page,
+        'has_more': (page * per_page) < total
+    })
+
+
+@sessions_bp.route('/api/sessions/<int:session_id>', methods=['GET'])
+def get_session_detail(session_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    s = LearningSession.query.filter_by(id=session_id, user_id=user_id).first()
+    if not s:
+        return jsonify({'error': 'Session not found'}), 404
+
+    explanations = Explanation.query.filter_by(session_id=s.id).order_by(Explanation.attempt_number).all()
+
+    exps_data = []
+    for exp in explanations:
+        quiz_results = QuizResult.query.filter_by(explanation_id=exp.id).all()
+        exps_data.append({
+            'id': exp.id,
+            'style': exp.style,
+            'response_text': exp.response_text,
+            'rag_rating': exp.rag_rating,
+            'attempt_number': exp.attempt_number,
+            'quiz_results': [{
+                'question': q.question,
+                'options': q.options,
+                'correct_index': q.correct_index,
+                'user_answer_index': q.user_answer_index,
+                'correct': q.correct,
+            } for q in quiz_results]
+        })
+
+    return jsonify({
+        'session': {
+            'id': s.id,
+            'topic': s.topic,
+            'quiz_score': s.final_quiz_score,
+            'total_attempts': s.total_attempts,
+            'started_at': s.started_at.isoformat() if s.started_at else None,
+            'explanations': exps_data,
+        }
+    })
 
 
 @sessions_bp.route('/api/sessions/stats', methods=['GET'])
@@ -48,22 +114,18 @@ def get_weekly_stats():
     from datetime import datetime, timedelta
     week_ago = datetime.utcnow() - timedelta(days=7)
 
-    # sessions this week
-    weekly_sessions = LearningSession.query.filter(
+    weekly = LearningSession.query.filter(
         LearningSession.user_id == user_id,
         LearningSession.started_at >= week_ago,
         LearningSession.completed_at != None
     ).all()
 
-    total_this_week = len(weekly_sessions)
-
-    # average quiz score this week
-    scores = [s.final_quiz_score for s in weekly_sessions if s.final_quiz_score is not None]
+    total = len(weekly)
+    scores = [s.final_quiz_score for s in weekly if s.final_quiz_score is not None]
     avg_score = round(sum(scores) / len(scores)) if scores else None
 
-    # best performing style
     style_scores = {}
-    for s in weekly_sessions:
+    for s in weekly:
         if s.final_style and s.final_quiz_score:
             if s.final_style not in style_scores:
                 style_scores[s.final_style] = []
@@ -74,7 +136,7 @@ def get_weekly_stats():
         best_style = max(style_scores, key=lambda k: sum(style_scores[k]) / len(style_scores[k]))
 
     return jsonify({
-        'total_this_week': total_this_week,
+        'total_this_week': total,
         'avg_score': avg_score,
         'best_style': best_style,
     })

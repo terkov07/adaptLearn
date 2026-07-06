@@ -386,6 +386,7 @@ function toggleTheme() {
                     questions={questions}
                     onComplete={handleQuizComplete}
                     onSkip={handleQuizSkip}
+                    explanationId={explanationId}
                   />
                 )}
 

@@ -61,7 +61,7 @@ export default function Register() {
         setError(data.error || 'Something went wrong')
         setStep(1) // send back to start if error
       }
-    } catch (err) {
+    } catch  {
       setError('Could not connect to server')
     } finally {
       setLoading(false)

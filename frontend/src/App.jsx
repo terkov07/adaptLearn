@@ -6,6 +6,9 @@ import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
 import Learn from './pages/Learn'
 import Settings from './pages/Settings'
+import History from './pages/History'
+import SessionDetail from './pages/SessionDetail'
+
 
 function App() {
   return (
@@ -19,6 +22,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/history/:id" element={<SessionDetail />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

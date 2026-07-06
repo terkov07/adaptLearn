@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function QuizCard({ questions, onComplete, onSkip }) {
+export default function QuizCard({ questions, onComplete, onSkip, explanationId }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState([])
   const [selected, setSelected] = useState(null)
@@ -23,16 +23,34 @@ export default function QuizCard({ questions, onComplete, onSkip }) {
 
   // check if last question
   if (currentIndex >= questions.length - 1) {
-    const correct = newAnswers.filter(
-      (ans, i) => ans === questions[i].correct_index
-    ).length
-    const pct = Math.round((correct / questions.length) * 100)
-    // show result then complete
-    setTimeout(() => {
-      setDone(true)
-      onComplete(pct, newAnswers)
-    }, 1200)
+  const newAnswers = [...answers, selected]
+  setAnswers(newAnswers)
+  setAnswered(true)
+
+  const correct = newAnswers.filter(
+    (ans, i) => ans === questions[i].correct_index
+  ).length
+  const pct = Math.round((correct / questions.length) * 100)
+
+  // save to database
+  if (explanationId) {
+    fetch('http://localhost:5000/api/quiz/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        explanation_id: explanationId,
+        questions: questions,
+        answers: newAnswers
+      })
+    })
   }
+
+  setTimeout(() => {
+    setDone(true)
+    onComplete(pct, newAnswers)
+  }, 1200)
+}
   // if not last — wait for Next button
 }
 

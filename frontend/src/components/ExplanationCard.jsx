@@ -1,3 +1,5 @@
+import ReactMarkdown from 'react-markdown'
+
 export default function ExplanationCard({ explanation, style, attempt }) {
   return (
     <div className="explanation-card">
@@ -8,9 +10,7 @@ export default function ExplanationCard({ explanation, style, attempt }) {
         )}
       </div>
       <div className="explanation-text">
-        {explanation.split('\n').map((para, i) => (
-          para.trim() ? <p key={i}>{para}</p> : null
-        ))}
+        <ReactMarkdown>{explanation}</ReactMarkdown>
       </div>
     </div>
   )

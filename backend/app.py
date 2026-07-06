@@ -122,6 +122,73 @@ def quiz():
         return jsonify({'questions': questions, 'num_questions': num_questions})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/quiz/submit', methods=['POST'])
+def submit_quiz():
+    data = request.json
+    explanation_id = data.get('explanation_id')
+    answers = data.get('answers', [])
+    questions = data.get('questions', [])
+
+    if not explanation_id:
+        return jsonify({'error': 'explanation_id required'}), 400
+
+    try:
+        from models import QuizResult, Explanation, LearningSession, UserStats
+        import json
+
+        correct_count = 0
+
+        for i, question in enumerate(questions):
+            user_answer = answers[i] if i < len(answers) else None
+            is_correct = user_answer == question.get('correct_index')
+            if is_correct:
+                correct_count += 1
+
+            result = QuizResult(
+                explanation_id=explanation_id,
+                question=question['question'],
+                options=json.dumps(question['options']),
+                correct_index=question['correct_index'],
+                user_answer_index=user_answer,
+                correct=is_correct
+            )
+            db.session.add(result)
+
+        score_pct = round((correct_count / len(questions)) * 100) if questions else 0
+
+        # update session score
+        explanation = Explanation.query.get(explanation_id)
+        if explanation:
+            learning_session = LearningSession.query.get(explanation.session_id)
+            if learning_session:
+                learning_session.final_quiz_score = score_pct
+                learning_session.completed_at = __import__('datetime').datetime.utcnow()
+
+                # award XP
+                xp_earned = max(5, 10 + max(0, score_pct - 60))
+                learning_session.xp_earned = xp_earned
+
+                # update user stats
+                user_stats = UserStats.query.filter_by(
+                    user_id=learning_session.user_id
+                ).first()
+                if user_stats:
+                    user_stats.xp += xp_earned
+                    user_stats.total_sessions += 1
+                    user_stats.total_topics += 1
+
+        db.session.commit()
+
+        return jsonify({
+            'score_pct': score_pct,
+            'correct_count': correct_count,
+            'total': len(questions),
+            'xp_earned': xp_earned if questions else 5
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
     
 app.register_blueprint(auth_bp)
 app.register_blueprint(sessions_bp)
