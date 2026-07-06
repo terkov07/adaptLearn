@@ -8,7 +8,7 @@ from routes.auth import auth_bp
 from routes.sessions import sessions_bp
 from routes.user import user_bp
 from routes.bookmarks import bookmarks_bp
-
+from routes.courses import courses_bp
 
 
 
@@ -191,11 +191,92 @@ def submit_quiz():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+@app.route('/api/extract', methods=['POST'])
+def extract():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+
+    file = request.files['file']
+    filename = file.filename
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+
+    if ext not in ['pdf', 'pptx', 'txt', 'md']:
+        return jsonify({'error': 'Unsupported file type'}), 400
+
+    import tempfile
+    import os
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f'.{ext}') as tmp:
+        file.save(tmp.name)
+        tmp_path = tmp.name
+
+    try:
+        # extract text
+        text = ''
+        if ext == 'pdf':
+            import fitz
+            doc = fitz.open(tmp_path)
+            text = '\n'.join(page.get_text() for page in doc)
+            doc.close()  # ← add this line to close before deleting
+            if len(text.strip()) < 100:
+                return jsonify({'error': 'PDF appears to be scanned — no text layer found'}), 400
+        elif ext == 'pptx':
+            from pptx import Presentation
+            prs = Presentation(tmp_path)
+            text = '\n'.join(
+                tf.text for sl in prs.slides
+                for sh in sl.shapes if sh.has_text_frame
+                for tf in sh.text_frame.paragraphs
+            )
+        else:
+            with open(tmp_path, encoding='utf-8') as f:
+                text = f.read()
+
+        # extract topics with Claude
+        import anthropic
+        client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+        prompt = f"""From this educational document, identify every distinct concept or topic a student would need to understand.
+Return ONLY a JSON array of short topic title strings, ordered logically.
+No markdown, no preamble. Example: ["Multi-store model","Working memory","Encoding"]
+Document: {text[:4000]}"""
+
+        message = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=1000,
+            messages=[{'role': 'user', 'content': prompt}]
+        )
+
+        import re
+        import json
+        raw = message.content[0].text
+        clean = re.sub(r'```json|```', '', raw).strip()
+        start = clean.find('[')
+        end = clean.rfind(']') + 1
+        topics = json.loads(clean[start:end]) if start != -1 else []
+
+        return jsonify({
+            'topics': topics,
+            'doc_text': text[:8000],
+            'filename': filename
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except Exception:
+            pass
     
 app.register_blueprint(auth_bp)
 app.register_blueprint(sessions_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(bookmarks_bp)
+app.register_blueprint(courses_bp)
 
 if __name__ == '__main__':
     with app.app_context():

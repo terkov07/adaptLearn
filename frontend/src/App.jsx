@@ -10,7 +10,9 @@ import History from './pages/History'
 import SessionDetail from './pages/SessionDetail'
 import Bookmarks from './pages/Bookmarks'
 import Landing from './pages/Landing'
-
+import Courses from './pages/Courses'
+import CourseBuilder from './pages/CourseBuilder'
+import CourseDetail from './pages/CourseDetail'
 
 
 
@@ -30,6 +32,9 @@ function App() {
           <Route path="/history/:id" element={<SessionDetail />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/" element={<Landing />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/new" element={<CourseBuilder />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
