@@ -25,6 +25,8 @@ CORS(app,
 
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
 
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///adaptlearn.db')
 if DATABASE_URL.startswith('postgres://'):
