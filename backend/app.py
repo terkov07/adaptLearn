@@ -19,7 +19,11 @@ CORS(app, supports_credentials=True, origins=['http://localhost:5173', 'https://
 
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///adaptlearn.db'
+
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///adaptlearn.db')
+if DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -300,5 +304,6 @@ app.register_blueprint(courses_bp)
 with app.app_context():
     db.create_all()
     print("Tables created!")
+
 if __name__ == '__main__':
     app.run(debug=True)
