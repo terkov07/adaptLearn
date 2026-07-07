@@ -15,7 +15,13 @@ from datetime import date, timedelta
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=['http://localhost:5173', 'https://adapt-learn-eta.vercel.app'])
+CCORS(app,
+  supports_credentials=True,
+  origins=[
+    'http://localhost:5173',
+    'https://adapt-learn-eta.vercel.app',
+  ]
+)
 
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
