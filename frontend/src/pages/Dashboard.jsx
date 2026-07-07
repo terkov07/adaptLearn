@@ -1,7 +1,8 @@
 import API_URL from '../api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTheme } from '../context/ThemeContext'
+
+import Navbar from '../components/Navbar'
 
 
 
@@ -62,8 +63,7 @@ function getLevel(xp) {
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { theme, setTheme } = useTheme()
-
+ 
   const [user, setUser] = useState(null)
   const [sessions, setSessions] = useState([])
   const [weeklyStats, setWeeklyStats] = useState(null)
@@ -72,11 +72,7 @@ export default function Dashboard() {
   const [recentIdx, setRecentIdx] = useState(0)
   const [courses, setCourses] = useState([])
 
-  const THEMES = ['focus', 'calm', 'energy', 'night', 'contrast']
-  function cycleTheme() {
-    const current = THEMES.indexOf(theme)
-    setTheme(THEMES[(current + 1) % THEMES.length])
-  }
+  
 
   useEffect(() => {
     async function load() {
@@ -116,16 +112,13 @@ export default function Dashboard() {
     load()
   }, [navigate])
 
-  async function handleLogout() {
-    await fetch(`${API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' })
-    navigate('/login')
-  }
+ 
 
   if (loading) return <div className="auth-loading">Loading your dashboard...</div>
   if (!user) return null
 
   const nickname = user.nickname || user.name
-  const initial = nickname[0].toUpperCase()
+
   const xp = user.stats?.xp || 0
   const streak = user.stats?.streak || 0
   const level = getLevel(xp)
@@ -135,39 +128,8 @@ export default function Dashboard() {
     <div className="dashboard">
 
       {/* ── Navbar ── */}
-      <nav className="navbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-          <span className="navbar-logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-            AdaptLearn
-          </span>
-          <div className="db-nav-links">
-            <button className="db-nav-link db-nav-link-active" onClick={() => navigate('/dashboard')}>Dashboard</button>
-            <button className="db-nav-link" onClick={() => navigate('/learn')}>Learn</button>
-            <button className="db-nav-link" onClick={() => navigate('/courses')}>Courses</button>
-            <button className="db-nav-link" onClick={() => navigate('/history')}>History</button>
-          </div>
-        </div>
-        <div className="navbar-right">
-          {streak > 0 && (
-            <span className="streak-badge">
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--amber)', display: 'inline-block', marginRight: 5 }} />
-              {streak}-day streak
-            </span>
-          )}
-          <span className="xp-badge">{xp.toLocaleString()} XP</span>
-          <button className="theme-toggle" onClick={cycleTheme} title="Switch theme">
-            <div className="theme-toggle-icon" />
-          </button>
-          <button
-            className="navbar-avatar"
-            onClick={() => navigate('/settings')}
-            title="Profile & Settings"
-          >
-            {initial}
-          </button>
-          <button className="btn-ghost-small" onClick={handleLogout}>Log out</button>
-        </div>
-      </nav>
+      <Navbar user={user} />
+
 
       <div className="db-content">
 
