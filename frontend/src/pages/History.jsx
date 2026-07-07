@@ -209,11 +209,11 @@ export default function History() {
     View full
   </button>
   <button
-    className="db-relearn-btn"
-    onClick={e => { e.stopPropagation(); navigate('/learn') }}
-  >
-    Relearn
-  </button>
+  className="db-relearn-btn"
+  onClick={e => { e.stopPropagation(); navigate(`/history/${s.id}`) }}
+>
+  View session
+</button>
 </div>
   </div>
 </div>

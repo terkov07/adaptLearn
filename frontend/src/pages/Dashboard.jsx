@@ -255,11 +255,11 @@ export default function Dashboard() {
                         <span className="db-pill-neutral">{activeSession.total_attempts} attempt(s)</span>
                       )}
                       <button
-                        className="db-relearn-btn"
-                        onClick={() => navigate('/learn')}
-                      >
-                        Relearn
-                      </button>
+  className="db-relearn-btn"
+  onClick={() => navigate(`/history/${activeSession?.id}`)}
+>
+    Relearn
+</button>
                     </div>
                   </div>
 
