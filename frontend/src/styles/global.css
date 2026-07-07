@@ -3932,3 +3932,225 @@ body {
   color: var(--text);
   margin-bottom: 8px;
 }
+
+/* ══════════════════════════════════════
+   ONBOARDING — updated
+══════════════════════════════════════ */
+
+.onboarding-option-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.onboarding-option-sub {
+  font-size: 13px;
+  color: var(--text3);
+  display: block;
+}
+
+.onboarding-back {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 16px;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.onboarding-back:hover { color: var(--accent); }
+
+/* Loading screen */
+.onboarding-loading-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 40px 24px;
+}
+
+.onboarding-loading-inner {
+  text-align: center;
+  max-width: 400px;
+}
+
+.onboarding-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 24px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.onboarding-loading-inner h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.onboarding-loading-inner p {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* Results screen */
+.onboarding-result-page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.onboarding-result-inner {
+  max-width: 540px;
+  width: 100%;
+  animation: alFade 0.4s ease both;
+}
+
+.result-tag {
+  display: inline-flex;
+  padding: 5px 14px;
+  border-radius: 99px;
+  background: var(--accentsoft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  letter-spacing: 0.02em;
+}
+
+.result-style-card {
+  background: var(--accent);
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  color: var(--onaccent);
+  margin-bottom: 24px;
+  box-shadow: 0 12px 32px var(--shadow2);
+}
+
+.result-style-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.result-style-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.result-style-tagline {
+  font-size: 16px;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.result-description {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.result-description p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+  margin: 0;
+}
+
+.result-strengths {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.result-strengths-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.result-strength-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.result-strength-row:last-child { margin-bottom: 0; }
+
+.result-strength-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.result-tip {
+  background: var(--ambersoft);
+  border: 1.5px solid var(--amber);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.result-tip-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+
+.result-tip p {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.result-note {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.result-note p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+  margin: 0;
+}
