@@ -297,8 +297,8 @@ app.register_blueprint(user_bp)
 app.register_blueprint(bookmarks_bp)
 app.register_blueprint(courses_bp)
 
+with app.app_context():
+    db.create_all()
+    print("Tables created!")
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        print("Tables created!")
     app.run(debug=True)
