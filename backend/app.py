@@ -15,7 +15,7 @@ from datetime import date, timedelta
 load_dotenv()
 
 app = Flask(__name__)
-CCORS(app,
+CORS(app,
   supports_credentials=True,
   origins=[
     'http://localhost:5173',
