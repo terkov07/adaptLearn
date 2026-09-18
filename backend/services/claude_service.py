@@ -9,15 +9,17 @@ load_dotenv()
 client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
 STYLE_PROMPTS = {
-    'analogy':  'Explain using one vivid real-world analogy. Start with "Imagine..."',
-    'story':    'Explain as a short story where the main character encounters the concept.',
-    'steps':    'Explain as a numbered sequence. One idea per step. Maximum 10 steps.',
-    'eli5':     'Explain for a curious 10-year-old. No jargon. Short sentences.',
-    'expert':   'Explain with precise technical language at undergraduate level.',
+    'analogy':     'Explain using one vivid, concrete real-world example the learner will recognise from everyday life.',
+    'story':       'Explain as a short, vivid story with strong visual imagery — describe the scene as if the learner is picturing it happening.',
+    'steps':       'Explain as a numbered sequence. One idea per step. Maximum 10 steps.',
+    'eli5':        'Explain for a curious 10-year-old. No jargon. Short sentences.',
+    'expert':      "Explain with precise technical language appropriate to the learner's own stated education level — go deeper than a simple summary, using correct terminology for that stage, but don't exceed what's expected at it.",
+    'expert_full': 'Explain with maximum technical depth and precision, using full specialist terminology and nuance, regardless of the learner\'s stated level — as if for a subject expert.',
 }
 
 #main explanation call
-def get_explanation(topic, style, education_level):
+#main explanation call
+def get_explanation(topic, style, education_level, doc_text=None, exam_board=None, spec_code=None):
     if not education_level:
         education_level = 'unknown level'
 
@@ -25,12 +27,21 @@ def get_explanation(topic, style, education_level):
     if not style_instruction:
         return 'Invalid style provided.'
 
-    if education_level:
-        context = f'The learner background: {education_level}.'
-    else:
-        context = 'Assume the learner has no specific background — explain accessibly.'
-    prompt = f'{context} {style_instruction} Topic: {topic}. Keep under 200 words.'
+    context = f'The learner background: {education_level}.'
+    if exam_board:
+        context += f' Exam board: {exam_board}.'
+    if spec_code:
+        context += f' Specification code: {spec_code}.'
 
+    grounding = ''
+    if doc_text:
+        grounding = (
+            f'\n\nUse the following specification/syllabus/reading material as your source of truth '
+            f'for what to cover and how to phrase it — do not rely on general knowledge of the subject '
+            f'where it conflicts with this text:\n"""\n{doc_text}\n"""\n'
+        )
+
+    prompt = f'{context} {style_instruction} Topic: {topic}.{grounding} Keep under 200 words.'
     message = client.messages.create(
         model='claude-haiku-4-5-20251001',
         max_tokens=1000,

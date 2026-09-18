@@ -20,6 +20,8 @@ CORS(app,
   origins=[
     'http://localhost:5173',
     'https://adapt-learn-eta.vercel.app',
+    'https://myadaptlearn.com',
+    'https://www.myadaptlearn.com',
   ]
 )
 
@@ -48,14 +50,17 @@ def explain():
     if not data.get('style'):
         return jsonify({'error': 'Style is required'}), 400
 
-    topic = data['topic']
+        topic = data['topic']
     style = data['style']
     education_level = data.get('education_level')
+    doc_text = data.get('doc_text')
+    exam_board = data.get('exam_board')
+    spec_code = data.get('spec_code')
     user_id = session.get('user_id')
 
     try:
         from services.claude_service import get_explanation
-        explanation_text = get_explanation(topic, style, education_level)
+        explanation_text = get_explanation(topic, style, education_level, doc_text, exam_board, spec_code)
 
         # save to database if logged in
         session_id = None

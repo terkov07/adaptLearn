@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from models import db, Course, CourseTopic
 from datetime import datetime
+from models import db, Course, CourseTopic, Deadline
 
 courses_bp = Blueprint('courses', __name__)
 
@@ -55,6 +56,9 @@ def create_course():
         source_type=data.get('source_type', 'manual'),
         source_filename=data.get('source_filename'),
         doc_text=data.get('doc_text'),
+        level=data.get('level'),
+        exam_board=data.get('exam_board'),
+        spec_code=data.get('spec_code'),
         status='not_started',
         created_at=datetime.utcnow()
     )
@@ -100,6 +104,9 @@ def get_course(course_id):
             'source_filename': course.source_filename,
             'doc_text': course.doc_text,
             'status': course.status,
+            'level': course.level,
+            'exam_board': course.exam_board,
+            'spec_code': course.spec_code,
             'progress_pct': pct,
             'completed_topics': completed,
             'total_topics': total,
@@ -164,3 +171,54 @@ def delete_course(course_id):
     db.session.commit()
 
     return jsonify({'success': True})
+
+@courses_bp.route('/api/courses/<int:course_id>/deadlines', methods=['GET'])
+def get_deadlines(course_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    course = Course.query.filter_by(id=course_id, user_id=user_id).first()
+    if not course:
+        return jsonify({'error': 'Course not found'}), 404
+
+    deadlines = Deadline.query.filter_by(course_id=course_id)\
+        .order_by(Deadline.due_date).all()
+
+    return jsonify({'deadlines': [{
+        'id': d.id,
+        'type': d.type,
+        'title': d.title,
+        'due_date': d.due_date.isoformat(),
+        'estimated_minutes': d.estimated_minutes,
+        'course_topic_id': d.course_topic_id,
+    } for d in deadlines]})
+
+
+@courses_bp.route('/api/courses/<int:course_id>/deadlines', methods=['POST'])
+def add_deadline(course_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    course = Course.query.filter_by(id=course_id, user_id=user_id).first()
+    if not course:
+        return jsonify({'error': 'Course not found'}), 404
+
+    data = request.json
+    for field in ('type', 'title', 'due_date'):
+        if not data.get(field):
+            return jsonify({'error': f'{field} is required'}), 400
+
+    deadline = Deadline(
+        course_id=course_id,
+        type=data['type'],
+        title=data['title'],
+        due_date=datetime.fromisoformat(data['due_date']),
+        estimated_minutes=data.get('estimated_minutes'),
+        course_topic_id=data.get('course_topic_id'),
+    )
+    db.session.add(deadline)
+    db.session.commit()
+
+    return jsonify({'success': True, 'id': deadline.id}), 201

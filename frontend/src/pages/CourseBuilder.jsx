@@ -12,6 +12,8 @@ export default function CourseBuilder() {
   // step 1
   const [title, setTitle] = useState('')
   const [level, setLevel] = useState('')
+  const [examBoard, setExamBoard] = useState('')
+  const [specCode, setSpecCode] = useState('')
 
   // step 2
   const [sourceType, setSourceType] = useState('')
@@ -95,6 +97,9 @@ export default function CourseBuilder() {
           source_type: sourceType,
           source_filename: sourceFilename || null,
           doc_text: docText || null,
+          level: level || null,
+          exam_board: examBoard || null,
+          spec_code: specCode || null,
         })
       })
       const data = await res.json()
@@ -149,6 +154,19 @@ export default function CourseBuilder() {
                   </button>
                 ))}
               </div>
+              {(level === 'GCSE' || level === 'A-Level') && (
+                <div className="form-group" style={{ marginTop: 20 }}>
+                  <label>Exam board (optional, but improves accuracy)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. AQA, Edexcel, OCR"
+                    value={examBoard}
+                    onChange={e => setExamBoard(e.target.value)}
+                    className="topic-input"
+                    style={{ marginTop: 6 }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -193,6 +211,22 @@ export default function CourseBuilder() {
                 {sourceType === 'import' ? 'Imported from document' : 'Built manually'}
               </span>
             </div>
+            {sourceType === 'import' && (level === 'GCSE' || level === 'A-Level') && (
+              <div className="form-group" style={{ marginBottom: 16 }}>
+                {/* TODO: wrap this whole import branch in a premium check once
+                    the subscription/tier system exists — this field (and file
+                    upload generally) should be Premium-only, per the pricing plan */}
+                <label>Specification code (optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 8464 — only if you know it"
+                  value={specCode}
+                  onChange={e => setSpecCode(e.target.value)}
+                  className="topic-input"
+                  style={{ marginTop: 6 }}
+                />
+              </div>
+            )}
 
             {/* Import file picker */}
             {sourceType === 'import' && topics.length === 0 && !extracting && (

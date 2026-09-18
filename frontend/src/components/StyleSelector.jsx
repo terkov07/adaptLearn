@@ -1,9 +1,10 @@
 const STYLES = [
-  { value: 'analogy', label: 'Analogy', desc: 'Compare to something familiar' },
-  { value: 'story', label: 'Story', desc: 'Learn through narrative' },
+  { value: 'analogy', label: 'Real-World Example', desc: 'A concrete example from everyday life' },
+  { value: 'story', label: 'Picture / Story', desc: 'Learn through vivid imagery and narrative' },
   { value: 'steps', label: 'Step-by-step', desc: 'One idea at a time' },
-  { value: 'eli5', label: 'ELI5', desc: 'Simple, no jargon' },
-  { value: 'expert', label: 'Expert', desc: 'Full technical depth' },
+  { value: 'eli5', label: "Explain Like I'm 5", desc: 'Simple, no jargon' },
+  { value: 'expert', label: 'Expert — My Level', desc: 'Full depth, matched to your level' },
+  { value: 'expert_full', label: 'Expert — Full Detail', desc: 'Maximum depth, beyond your syllabus' },
 ]
 
 export default function StyleSelector({ selected, onSelect }) {

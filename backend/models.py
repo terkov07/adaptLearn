@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -10,7 +10,7 @@ class User(db.Model):
     nickname = db.Column(db.String)
     email = db.Column(db.String, unique=True, nullable=False)
     password_hash = db.Column(db.String, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     preferences = db.relationship('UserPreferences', backref='user', uselist=False, cascade='all, delete-orphan')
     stats = db.relationship('UserStats', backref='user', uselist=False, cascade='all, delete-orphan')
@@ -61,7 +61,7 @@ class LearningSession(db.Model):
     final_quiz_score = db.Column(db.Integer)
     xp_earned = db.Column(db.Integer, default=0)
     duration_seconds = db.Column(db.Integer)
-    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    started_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     completed_at = db.Column(db.DateTime)
 
     explanations = db.relationship('Explanation', backref='session', cascade='all, delete-orphan')
@@ -77,7 +77,7 @@ class Explanation(db.Model):
     rag_rating = db.Column(db.String)
     attempt_number = db.Column(db.Integer, nullable=False)
     model_used = db.Column(db.String)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     quiz_results = db.relationship('QuizResult', backref='explanation', cascade='all, delete-orphan')
     bookmark = db.relationship('Bookmark', backref='explanation', uselist=False, cascade='all, delete-orphan')
@@ -104,9 +104,25 @@ class Course(db.Model):
     source_filename = db.Column(db.String)
     doc_text = db.Column(db.String)
     status = db.Column(db.String, default='not_started')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    level = db.Column(db.String)          # 'gcse' | 'alevel' | 'university'
+    exam_board = db.Column(db.String)     # e.g. 'AQA', 'Edexcel', 'OCR' — null for university
+    spec_code = db.Column(db.String)      # e.g. '8464' — null for university
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     topics = db.relationship('CourseTopic', backref='course', cascade='all, delete-orphan')
+    deadlines = db.relationship('Deadline', backref='course', cascade='all, delete-orphan')
+
+
+class Deadline(db.Model):
+    __tablename__ = 'deadlines'
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    course_topic_id = db.Column(db.Integer, db.ForeignKey('course_topics.id'), nullable=True)
+    type = db.Column(db.String, nullable=False)   # 'mock' | 'exam' | 'coursework' | 'reading' | 'essay'
+    title = db.Column(db.String, nullable=False)
+    due_date = db.Column(db.DateTime, nullable=False)
+    estimated_minutes = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class CourseTopic(db.Model):
@@ -127,7 +143,7 @@ class Bookmark(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     explanation_id = db.Column(db.Integer, db.ForeignKey('explanations.id'), nullable=False)
     note = db.Column(db.String)
-    saved_at = db.Column(db.DateTime, default=datetime.utcnow)
+    saved_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         db.UniqueConstraint('user_id', 'explanation_id', name='unique_bookmark'),

@@ -12,8 +12,46 @@ export default function CourseDetail() {
   const [loading, setLoading] = useState(true)
   const [activeTopic, setActiveTopic] = useState(null)
   const [autoAdvance, setAutoAdvance] = useState(true)
+  const [deadlines, setDeadlines] = useState([])
+  const [showAddDeadline, setShowAddDeadline] = useState(false)
+  const [newDeadline, setNewDeadline] = useState({ type: 'exam', title: '', due_date: '' })
 
- 
+  const TYPE_META = {
+  exam:       { label: 'Exam',       color: '#E8735C' },
+  mock:       { label: 'Mock',       color: '#F2A65A' },
+  coursework: { label: 'Coursework', color: '#5B4EC8' },
+  essay:      { label: 'Essay',      color: '#5B4EC8' },
+  reading:    { label: 'Reading',    color: '#8A8FA3' },
+}
+async function loadDeadlines() {
+  try {
+    const res = await fetch(`${API_URL}/api/courses/${id}/deadlines`, { credentials: 'include' })
+    const data = await res.json()
+    setDeadlines(res.ok ? (data.deadlines || []) : [])
+  } catch {
+    setDeadlines([])
+  }
+}
+
+async function addDeadline() {
+  if (!newDeadline.title || !newDeadline.due_date) {
+    alert('Please fill in both a title and a full date + time.')
+    return
+  }
+  try {
+    await fetch(`${API_URL}/api/courses/${id}/deadlines`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(newDeadline)
+    })
+    setNewDeadline({ type: 'exam', title: '', due_date: '' })
+    setShowAddDeadline(false)
+    loadDeadlines()
+  } catch {
+    console.error('Failed to add deadline')
+  }
+}
 
   
 useEffect(() => {
@@ -25,6 +63,7 @@ useEffect(() => {
       if (!res.ok) { navigate('/courses'); return }
       const data = await res.json()
       setCourse(data.course)
+      loadDeadlines()
       const firstIncomplete = data.course.topics.find(t => t.status !== 'complete')
       if (firstIncomplete) setActiveTopic(firstIncomplete)
     } catch {
@@ -101,6 +140,58 @@ useEffect(() => {
               <span className="settings-toggle-knob" style={{ width: 16, height: 16 }} />
             </button>
           </div>
+          <div style={{ padding: '0 16px 16px', borderBottom: '1px solid #eee', marginBottom: 12 }}>
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+    <span className="settings-toggle-label" style={{ fontSize: 13 }}>Deadlines</span>
+    <button className="btn-ghost" style={{ width: 'auto', padding: '2px 10px', fontSize: 12 }}
+      onClick={() => setShowAddDeadline(!showAddDeadline)}>
+      {showAddDeadline ? 'Cancel' : '+ Add'}
+    </button>
+  </div>
+
+
+
+{deadlines.map(d => {
+  const meta = TYPE_META[d.type] || { label: d.type, color: '#8A8FA3' }
+  const isUrgent = d.type === 'exam' || d.type === 'mock'
+  return (
+    <div key={d.id} style={{ fontSize: 13, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{
+        fontSize: 10,
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        color: '#fff',
+        background: meta.color,
+        borderRadius: 4,
+        padding: '2px 6px',
+        flexShrink: 0,
+      }}>
+        {meta.label}
+      </span>
+      <span style={{ fontWeight: isUrgent ? 700 : 400, flexGrow: 1 }}>{d.title}</span>
+      <span style={{ color: '#888', flexShrink: 0 }}>{new Date(d.due_date).toLocaleDateString()}</span>
+    </div>
+  )
+})}
+
+  {showAddDeadline && (
+    <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <select value={newDeadline.type} onChange={e => setNewDeadline({ ...newDeadline, type: e.target.value })}>
+        <option value="exam">Exam</option>
+        <option value="mock">Mock</option>
+        <option value="coursework">Coursework</option>
+        <option value="reading">Reading</option>
+        <option value="essay">Essay</option>
+      </select>
+      <input placeholder="Title" value={newDeadline.title}
+        onChange={e => setNewDeadline({ ...newDeadline, title: e.target.value })} />
+      <input type="datetime-local" value={newDeadline.due_date}
+        onChange={e => setNewDeadline({ ...newDeadline, due_date: e.target.value })} />
+      <button className="btn-primary" style={{ marginTop: 4 }} onClick={addDeadline}>Save</button>
+    </div>
+  )}
+</div>
 
           <div className="cd-topics">
             {course.topics.map(t => (
@@ -127,11 +218,14 @@ useEffect(() => {
                 <h2 className="cd-active-topic">{activeTopic.title}</h2>
               </div>
               <CourseLearner
-                key={activeTopic.id}
-                topic={activeTopic}
-                docText={course.doc_text}
-                onComplete={() => markTopicComplete(activeTopic.id)}
-              />
+                  key={activeTopic.id}
+                  topic={activeTopic}
+                  docText={course.doc_text}
+                  educationLevel={course.level}
+                  examBoard={course.exam_board}
+                  specCode={course.spec_code}
+                  onComplete={() => markTopicComplete(activeTopic.id)}
+                />
             </div>
           ) : (
             <div className="cd-complete-state">
@@ -163,9 +257,17 @@ useEffect(() => {
 }
 
 // ─── Embedded learn loop ──────────────────────────────────────────────────────
-const STYLE_ORDER = ['analogy', 'story', 'steps', 'eli5', 'expert']
+const STYLE_ORDER = ['analogy', 'story', 'steps', 'eli5', 'expert', 'expert_full']
+const STYLE_LABELS = {
+  analogy: 'Real-World Example',
+  story: 'Picture / Story',
+  steps: 'Step-by-step',
+  eli5: "Explain Like I'm 5",
+  expert: 'Expert — My Level',
+  expert_full: 'Expert — Full Detail',
+}
 
-function CourseLearner({ topic, docText, onComplete }) {
+function CourseLearner({ topic, docText, educationLevel, examBoard, specCode, onComplete }) {
   const [selectedStyle, setSelectedStyle] = useState('analogy')
   const [loadingExp, setLoadingExp] = useState(false)
   const [explanation, setExplanation] = useState(null)
@@ -208,6 +310,9 @@ function CourseLearner({ topic, docText, onComplete }) {
           topic: topic.title,
           style,
           doc_text: docText || null,
+          education_level: educationLevel || null,
+          exam_board: examBoard || null,
+          spec_code: specCode || null,
         })
       })
       const data = await res.json()
@@ -325,7 +430,7 @@ function CourseLearner({ topic, docText, onComplete }) {
                   className={`style-option ${selectedStyle === s ? 'style-option-active' : ''}`}
                   onClick={() => setSelectedStyle(s)}
                 >
-                  <span className="style-name" style={{ textTransform: 'capitalize' }}>{s}</span>
+                  <span className="style-name">{STYLE_LABELS[s]}</span>
                 </button>
               ))}
             </div>
@@ -350,8 +455,8 @@ function CourseLearner({ topic, docText, onComplete }) {
 
       {attempt > 1 && (
         <div className="attempt-banner">
-          Attempt {attempt} — trying <strong style={{ textTransform: 'capitalize' }}>
-            {usedStyles[usedStyles.length - 1]}
+          Attempt {attempt} — trying <strong>
+            {STYLE_LABELS[usedStyles[usedStyles.length - 1]]}
           </strong>
         </div>
       )}
@@ -373,8 +478,8 @@ function CourseLearner({ topic, docText, onComplete }) {
         <>
           <div className="explanation-card">
             <div className="explanation-header">
-              <span className="explanation-badge" style={{ textTransform: 'capitalize' }}>
-                {usedStyles[usedStyles.length - 1]}
+              <span className="explanation-badge">
+                {STYLE_LABELS[usedStyles[usedStyles.length - 1]]}
               </span>
               {attempt > 1 && <span className="attempt-badge">Attempt {attempt}</span>}
               <button
@@ -429,9 +534,7 @@ function CourseLearner({ topic, docText, onComplete }) {
               <p className="style-picker-label">Pick a style to try next:</p>
               <div className="style-picker-options">
                 {STYLE_ORDER.filter(s => !usedStyles.includes(s)).map(s => (
-                  <button key={s} className="style-picker-btn" onClick={() => pickStyle(s)}>
-                    {s}
-                  </button>
+                  <button key={s} className="style-picker-btn" onClick={() => pickStyle(s)}>{STYLE_LABELS[s]}</button>
                 ))}
               </div>
             </div>

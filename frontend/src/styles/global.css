@@ -1432,8 +1432,17 @@ body {
 
   .rag-buttons { flex-direction: column; }
 
-  .style-options { gap: 6px; }
-  .style-option  { min-width: 80px; }
+ /* Style selector — wrap on mobile so every option is visible without scrolling */
+.style-options {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.style-option {
+  flex: 1 1 auto;
+  min-width: 100px;
+  padding: 8px 10px;
+}
 
   .quiz-complete-actions { flex-direction: column; }
   .quiz-complete-actions .btn-primary,
@@ -4795,9 +4804,8 @@ body {
    SCROLLBAR — hide on mobile
 ───────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .style-options::-webkit-scrollbar,
-  .theme-swatches::-webkit-scrollbar,
-  .settings-tabs::-webkit-scrollbar {
-    display: none;
+.theme-swatches::-webkit-scrollbar,
+.settings-tabs::-webkit-scrollbar {
+  display: none;
   }
 }
