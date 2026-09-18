@@ -45,10 +45,8 @@ export default function Landing() {
       <header className="landing-nav">
         <div className="landing-nav-inner">
           <div className="landing-logo">
-            <div className="landing-logo-icon">
-              <div className="landing-logo-diamond" />
-            </div>
-            <span>AdaptLearn</span>
+            <img src="/favicon.png" alt="" style={{ width: 32, height: 32, borderRadius: 7 }} />
+            <span>myadaptlearn</span>
           </div>
           <div className="landing-nav-right">
             <button className="theme-toggle" onClick={cycleTheme} title="Switch theme">

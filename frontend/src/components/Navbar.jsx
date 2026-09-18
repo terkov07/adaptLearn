@@ -39,10 +39,11 @@ export default function Navbar({ user, showBack, backTo, backLabel }) {
           ) : (
             <span
               className="navbar-logo"
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
               onClick={() => navigate('/dashboard')}
             >
-              AdaptLearn
+              <img src="/favicon.png" alt="" style={{ width: 24, height: 24, borderRadius: 6 }} />
+              myadaptlearn
             </span>
           )}
 

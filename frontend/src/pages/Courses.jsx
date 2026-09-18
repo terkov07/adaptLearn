@@ -46,8 +46,9 @@ export default function Courses() {
     <div className="dashboard">
       <nav className="navbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-          <span className="navbar-logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-            AdaptLearn
+          <span className="navbar-logo" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }} onClick={() => navigate('/dashboard')}>
+            <img src="/favicon.png" alt="" style={{ width: 24, height: 24, borderRadius: 6 }} />
+            myadaptlearn
           </span>
           <div className="db-nav-links">
             <button className="db-nav-link" onClick={() => navigate('/dashboard')}>Dashboard</button>

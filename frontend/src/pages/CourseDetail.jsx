@@ -112,8 +112,10 @@ useEffect(() => {
         <button className="navbar-back" onClick={() => navigate('/courses')}>
           ← Courses
         </button>
-        <span className="navbar-logo">AdaptLearn</span>
-        <span />
+        <span className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <img src="/favicon.png" alt="" style={{ width: 24, height: 24, borderRadius: 6 }} />
+          myadaptlearn
+        </span>
       </nav>
 
       <div className="cd-layout">
