@@ -16,7 +16,7 @@ export default function PrivacyPolicy() {
       <p style={{ fontStyle: 'italic', color: '#6B7280', marginBottom: 32 }}>Last updated: September 2026</p>
 
       <h2 style={{ fontSize: 20, marginTop: 32 }}>1. Who we are</h2>
-      <p>myadaptlearn is run by an individual sole trader based in the UK. For any question about this policy or your data, contact MyAdaptLearn@gmail.com.</p>
+      <p>myadaptlearn is run by an individual sole trader based in the UK. For any question about this policy or your data, contact myadaptlearn.com@gmail.com.</p>
       <p>ICO registration number: C2037550</p>
 
       <h2 style={{ fontSize: 20, marginTop: 32 }}>2. What we collect, and why</h2>
@@ -43,7 +43,7 @@ export default function PrivacyPolicy() {
       <p>We keep your data for as long as your account is active. If you delete your account, we delete your personal data within 30 days, except anything we're legally required to keep for longer.</p>
 
       <h2 style={{ fontSize: 20, marginTop: 32 }}>5. Your rights</h2>
-      <p>Under UK GDPR, you have the right to access the data we hold about you, correct it if it's wrong, ask us to delete it, ask us to export it to you, and object to certain kinds of processing. To exercise any of these, email  MyAdaptLearn@gmail.com. We'll respond within one month.</p>
+      <p>Under UK GDPR, you have the right to access the data we hold about you, correct it if it's wrong, ask us to delete it, ask us to export it to you, and object to certain kinds of processing. To exercise any of these, email  myadaptearn.com@gmail.com. We'll respond within one month.</p>
       <p>You also have the right to complain to the ICO (ico.org.uk) if you think we've mishandled your data.</p>
 
       <h2 style={{ fontSize: 20, marginTop: 32 }}>6. Children's privacy</h2>
@@ -62,7 +62,7 @@ export default function PrivacyPolicy() {
       <p>We may update this policy as the product changes. Any update will be posted here with a new "last updated" date.</p>
 
       <h2 style={{ fontSize: 20, marginTop: 32 }}>11. Contact</h2>
-      <p style={{ marginBottom: 48 }}> MyAdaptLearn@gmail.com — ICO registration number: C2037550</p>
+      <p style={{ marginBottom: 48 }}> myadaptlearn.com@gmail.com — ICO registration number: C2037550</p>
     </div>
   )
 }

@@ -54,7 +54,7 @@ export default function TermsOfUse() {
       <p>We may update these terms as the product develops. Continued use after a change means you accept the new terms.</p>
 
       <h2 style={{ fontSize: 20, marginTop: 32 }}>11. Contact</h2>
-      <p style={{ marginBottom: 48 }}> MyAdaptLearn@gmail.com</p>
+      <p style={{ marginBottom: 48 }}> myadaptlearn.com@gmail.com</p>
     </div>
   )
 }

@@ -279,29 +279,33 @@ def extract():
 
         client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
+                from concurrent.futures import ThreadPoolExecutor
+
         CHUNK_SIZE = 15000
         chunks = [text[i:i + CHUNK_SIZE] for i in range(0, len(text), CHUNK_SIZE)]
 
-        all_topics = []
-        for i, chunk in enumerate(chunks):
+        def extract_chunk(args):
+            i, chunk = args
             prompt = f"""From this excerpt (part {i + 1} of {len(chunks)}) of an educational document, identify every distinct concept or topic a student would need to understand.
 Return ONLY a JSON array of short topic title strings, ordered logically.
 No markdown, no preamble. If this excerpt is just a title page, contents page, or admin/copyright text with no real topics, return an empty array [].
 Example: ["Multi-store model","Working memory","Encoding"]
 Document excerpt: {chunk}"""
-
             message = client.messages.create(
                 model='claude-haiku-4-5-20251001',
                 max_tokens=2000,
                 messages=[{'role': 'user', 'content': prompt}]
             )
-
             raw = message.content[0].text
             clean = re.sub(r'```json|```', '', raw).strip()
             start = clean.find('[')
             end = clean.rfind(']') + 1
-            if start != -1:
-                all_topics.extend(json.loads(clean[start:end]))
+            return json.loads(clean[start:end]) if start != -1 else []
+
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            results = list(executor.map(extract_chunk, enumerate(chunks)))
+
+        all_topics = [t for chunk_topics in results for t in chunk_topics]
 
         # dedupe while keeping order (case-insensitive)
         seen = set()
