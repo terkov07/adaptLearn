@@ -276,10 +276,11 @@ def extract():
         import anthropic
         import re
         import json
+        from concurrent.futures import ThreadPoolExecutor
 
         client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
-                from concurrent.futures import ThreadPoolExecutor
+                
 
         CHUNK_SIZE = 15000
         chunks = [text[i:i + CHUNK_SIZE] for i in range(0, len(text), CHUNK_SIZE)]
