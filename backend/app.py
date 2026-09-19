@@ -278,7 +278,7 @@ def extract():
         prompt = f"""From this educational document, identify every distinct concept or topic a student would need to understand.
 Return ONLY a JSON array of short topic title strings, ordered logically.
 No markdown, no preamble. Example: ["Multi-store model","Working memory","Encoding"]
-Document: {text[:4000]}"""
+Document: {text[:20000]}"""
 
         message = client.messages.create(
             model='claude-haiku-4-5-20251001',

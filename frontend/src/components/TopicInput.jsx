@@ -1,12 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-export default function TopicInput({ onSubmit, loading }) {
-  const [topic, setTopic] = useState('')
+export default function TopicInput({ onSubmit, loading, initialValue }) {
+  const [topic, setTopic] = useState(initialValue || '')
+
+  useEffect(() => {
+    if (initialValue) setTopic(initialValue)
+  }, [initialValue])
 
   function handleSubmit() {
     if (!topic.trim()) return
     onSubmit(topic.trim())
   }
+  // ...rest of the file stays exactly the same
 
   function handleKeyDown(e) {
     if (e.key === 'Enter') handleSubmit()

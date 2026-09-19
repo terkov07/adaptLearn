@@ -253,6 +253,7 @@ export default function Learn() {
             <TopicInput
               onSubmit={handleFirstExplain}
               loading={loading}
+              initialValue={currentTopic}
             />
           </div>
         )}

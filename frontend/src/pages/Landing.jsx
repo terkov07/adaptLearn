@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
+import { Link } from 'react-router-dom'
 
 
 const STYLES = [
@@ -160,10 +161,10 @@ export default function Landing() {
             </button>
           </div>
          <div className="landing-footer-note">
-            myadaptlearn · A personalised learning experiment
+            MyAdaptLearn · A personalised learning experiment
             <div style={{ marginTop: 8, fontSize: 13 }}>
-              <a href="/privacy" style={{ color: 'inherit', marginRight: 16 }}>Privacy Policy</a>
-              <a href="/terms" style={{ color: 'inherit' }}>Terms of Use</a>
+              <Link to="/privacy" style={{ color: 'inherit', marginRight: 16 }}>Privacy Policy</Link>
+              <Link to="/terms" style={{ color: 'inherit' }}>Terms of Use</Link>
             </div>
           </div>
         </section>

@@ -92,7 +92,7 @@ export default function Navbar({ user, showBack, backTo, backLabel }) {
               {initial}
             </button>
           )}
-          <button onClick={handleLogout}>Log out</button>
+          <button className="btn-ghost" style={{ width: 'auto' }} onClick={handleLogout}>Log out</button>
         </div>
       </nav>
 

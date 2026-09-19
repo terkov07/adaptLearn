@@ -6,11 +6,12 @@ import Navbar from '../components/Navbar'
 
 
 const STYLES = [
-  { value: 'analogy',  label: 'Analogy',      desc: 'Compare to something familiar' },
-  { value: 'story',    label: 'Story',         desc: 'Learn through narrative' },
-  { value: 'steps',    label: 'Step-by-step',  desc: 'One idea at a time' },
-  { value: 'eli5',     label: 'ELI5',          desc: 'Simple, no jargon' },
-  { value: 'expert',   label: 'Expert',        desc: 'Full technical depth' },
+  { value: 'analogy',     label: 'Real-World Example', desc: 'A concrete example from everyday life' },
+  { value: 'story',       label: 'Picture / Story',    desc: 'Learn through vivid imagery and narrative' },
+  { value: 'steps',       label: 'Step-by-step',       desc: 'One idea at a time' },
+  { value: 'eli5',        label: "Explain Like I'm 5",  desc: 'Simple, no jargon' },
+  { value: 'expert',      label: 'Expert — My Level',  desc: 'Full depth, matched to your level' },
+  { value: 'expert_full', label: 'Expert — Full Detail', desc: 'Maximum depth, beyond your syllabus' },
 ]
 
 const THEMES = [
@@ -453,6 +454,14 @@ export default function Settings() {
           </div>
         )}
       </div>
+      <div style={{ marginTop: 32, fontSize: 13, textAlign: 'center' }}>
+        <a href="/privacy" style={{ color: 'var(--text-secondary)', marginRight: 16 }}>Privacy Policy</a>
+        <a href="/terms" style={{ color: 'var(--text-secondary)' }}>Terms of Use</a>
+      </div>
     </div>
+
+    
   )
+  
+  
 }

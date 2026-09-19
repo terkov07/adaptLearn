@@ -216,21 +216,27 @@ useEffect(() => {
 })}
 
   {showAddDeadline && (
-    <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <select value={newDeadline.type} onChange={e => setNewDeadline({ ...newDeadline, type: e.target.value })}>
-        <option value="exam">Exam</option>
-        <option value="mock">Mock</option>
-        <option value="coursework">Coursework</option>
-        <option value="reading">Reading</option>
-        <option value="essay">Essay</option>
-      </select>
-      <input placeholder="Title" value={newDeadline.title}
-        onChange={e => setNewDeadline({ ...newDeadline, title: e.target.value })} />
-      <input type="datetime-local" value={newDeadline.due_date}
-        onChange={e => setNewDeadline({ ...newDeadline, due_date: e.target.value })} />
-      <button className="btn-primary" style={{ marginTop: 4 }} onClick={addDeadline}>Save</button>
-    </div>
-  )}
+  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <select
+      value={newDeadline.type}
+      onChange={e => setNewDeadline({ ...newDeadline, type: e.target.value })}
+      className="topic-input"
+    >
+      <option value="exam">Exam</option>
+      <option value="mock">Mock</option>
+      <option value="coursework">Coursework</option>
+      <option value="reading">Reading</option>
+      <option value="essay">Essay</option>
+    </select>
+    <input placeholder="Title" value={newDeadline.title}
+      onChange={e => setNewDeadline({ ...newDeadline, title: e.target.value })}
+      className="topic-input" />
+    <input type="datetime-local" value={newDeadline.due_date}
+      onChange={e => setNewDeadline({ ...newDeadline, due_date: e.target.value })}
+      className="topic-input" />
+    <button className="btn-primary" style={{ marginTop: 4 }} onClick={addDeadline}>Save</button>
+  </div>
+)}
 </div>
 
           <div className="cd-topics">
