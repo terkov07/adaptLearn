@@ -287,7 +287,8 @@ def extract():
 
         def extract_chunk(args):
             i, chunk = args
-            prompt = f"""From this excerpt (part {i + 1} of {len(chunks)}) of an educational document, identify every distinct concept or topic a student would need to understand.
+            prompt = f"""From this excerpt (part {i + 1} of {len(chunks)}) of an educational document, identify the main study topics — the level a student would title a revision session or flashcard deck around, not every individual sub-point, bullet, or numbered spec reference.
+Group closely related sub-points together under one topic. Aim for roughly 3-10 topics per excerpt, not one per sentence.
 Return ONLY a JSON array of short topic title strings, ordered logically.
 No markdown, no preamble. If this excerpt is just a title page, contents page, or admin/copyright text with no real topics, return an empty array [].
 Example: ["Multi-store model","Working memory","Encoding"]
@@ -316,6 +317,23 @@ Document excerpt: {chunk}"""
             if key and key not in seen:
                 seen.add(key)
                 topics.append(t.strip())
+                # consolidate — chunk-level extraction still leaves near-duplicates and fragments
+        if len(topics) > 30:
+            consolidate_prompt = f"""Here is a raw list of topics extracted from a specification document. It's too granular and has overlap. Consolidate it into a clean list of well-scoped study topics a student would actually revise by — merge near-duplicates and closely related sub-points into single coherent topics, but don't merge genuinely distinct topics together.
+Return ONLY a JSON array of the consolidated topic title strings, ordered logically. No markdown, no preamble.
+Raw topics: {json.dumps(topics)}"""
+
+            consolidate_message = client.messages.create(
+                model='claude-haiku-4-5-20251001',
+                max_tokens=4000,
+                messages=[{'role': 'user', 'content': consolidate_prompt}]
+            )
+            raw = consolidate_message.content[0].text
+            clean = re.sub(r'```json|```', '', raw).strip()
+            start = clean.find('[')
+            end = clean.rfind(']') + 1
+            if start != -1:
+                topics = json.loads(clean[start:end])
 
         return jsonify({
             'topics': topics,
