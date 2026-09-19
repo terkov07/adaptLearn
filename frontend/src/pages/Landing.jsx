@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom'
 
 
 const STYLES = [
-  { icon: '🔗', name: 'Analogy', desc: 'Connect new ideas to things you already know' },
-  { icon: '📖', name: 'Story', desc: 'Learn through narrative and characters' },
+  { icon: '🔗', name: 'Real-World Example', desc: 'Connect new ideas to things you already know' },
+  { icon: '📖', name: 'Picture / Story', desc: 'Learn through vivid imagery and narrative' },
   { icon: '📋', name: 'Step-by-step', desc: 'Break it down one clear idea at a time' },
-  { icon: '💬', name: 'ELI5', desc: 'Simple language, no jargon, just clarity' },
-  { icon: '🎓', name: 'Expert', desc: 'Full technical depth for those who want it' },
+  { icon: '💬', name: "Explain Like I'm 5", desc: 'Simple language, no jargon, just clarity' },
+  { icon: '🎓', name: 'Expert — My Level', desc: 'Full depth, matched to your level' },
+  { icon: '🔬', name: 'Expert — Full Detail', desc: 'Maximum depth, beyond your syllabus' },
 ]
 
 const HOW_STEPS = [
@@ -94,7 +95,7 @@ export default function Landing() {
           <div className="landing-hero-card">
             <div className="landing-demo-header">
               <span className="landing-demo-topic">Topic · Photosynthesis</span>
-              <span className="explanation-badge">Analogy</span>
+              <span className="explanation-badge">Real-World Example</span>
             </div>
             <p className="landing-demo-text">
               Picture a leaf as a tiny solar-powered kitchen: sunlight is the stove,
@@ -114,8 +115,8 @@ export default function Landing() {
 
         {/* ── Five styles ── */}
         <section className="landing-section">
-          <div className="landing-section-label">Five ways to understand</div>
-          <h2 className="landing-h2">One topic, explained five ways</h2>
+          <div className="landing-section-label">Six ways to understand</div>
+          <h2 className="landing-h2">One topic, explained six ways</h2>
           <div className="landing-styles-grid">
             {STYLES.map(s => (
               <div key={s.name} className="landing-style-card">
@@ -161,7 +162,7 @@ export default function Landing() {
             </button>
           </div>
          <div className="landing-footer-note">
-            MyAdaptLearn · A personalised learning experiment
+            myadaptlearn · A personalised learning experiment
             <div style={{ marginTop: 8, fontSize: 13 }}>
               <Link to="/privacy" style={{ color: 'inherit', marginRight: 16 }}>Privacy Policy</Link>
               <Link to="/terms" style={{ color: 'inherit' }}>Terms of Use</Link>
