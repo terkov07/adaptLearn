@@ -3253,7 +3253,7 @@ body {
 /* Five styles grid */
 .landing-styles-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
 
@@ -4667,10 +4667,6 @@ body {
     gap: 10px;
   }
 
-  /* Hide last style card on very small screens to keep even grid */
-  .landing-styles-grid .landing-style-card:last-child {
-    display: none;
-  }
 
   .landing-steps-grid {
     grid-template-columns: 1fr;
