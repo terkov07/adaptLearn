@@ -272,27 +272,45 @@ def extract():
             with open(tmp_path, encoding='utf-8') as f:
                 text = f.read()
 
-        # extract topics with Claude
+               # extract topics with Claude — chunked so long specs don't lose their back half
         import anthropic
-        client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
-        prompt = f"""From this educational document, identify every distinct concept or topic a student would need to understand.
-Return ONLY a JSON array of short topic title strings, ordered logically.
-No markdown, no preamble. Example: ["Multi-store model","Working memory","Encoding"]
-Document: {text[:20000]}"""
-
-        message = client.messages.create(
-            model='claude-haiku-4-5-20251001',
-            max_tokens=1000,
-            messages=[{'role': 'user', 'content': prompt}]
-        )
-
         import re
         import json
-        raw = message.content[0].text
-        clean = re.sub(r'```json|```', '', raw).strip()
-        start = clean.find('[')
-        end = clean.rfind(']') + 1
-        topics = json.loads(clean[start:end]) if start != -1 else []
+
+        client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+
+        CHUNK_SIZE = 15000
+        chunks = [text[i:i + CHUNK_SIZE] for i in range(0, len(text), CHUNK_SIZE)]
+
+        all_topics = []
+        for i, chunk in enumerate(chunks):
+            prompt = f"""From this excerpt (part {i + 1} of {len(chunks)}) of an educational document, identify every distinct concept or topic a student would need to understand.
+Return ONLY a JSON array of short topic title strings, ordered logically.
+No markdown, no preamble. If this excerpt is just a title page, contents page, or admin/copyright text with no real topics, return an empty array [].
+Example: ["Multi-store model","Working memory","Encoding"]
+Document excerpt: {chunk}"""
+
+            message = client.messages.create(
+                model='claude-haiku-4-5-20251001',
+                max_tokens=2000,
+                messages=[{'role': 'user', 'content': prompt}]
+            )
+
+            raw = message.content[0].text
+            clean = re.sub(r'```json|```', '', raw).strip()
+            start = clean.find('[')
+            end = clean.rfind(']') + 1
+            if start != -1:
+                all_topics.extend(json.loads(clean[start:end]))
+
+        # dedupe while keeping order (case-insensitive)
+        seen = set()
+        topics = []
+        for t in all_topics:
+            key = t.strip().lower()
+            if key and key not in seen:
+                seen.add(key)
+                topics.append(t.strip())
 
         return jsonify({
             'topics': topics,
