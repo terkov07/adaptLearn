@@ -1,0 +1,93 @@
+Date : 2026-09-19 12:01:44
+Directory : c:\Users\terez\Documents\adaptLearn\frontend
+Total : 47 files,  10820 codes, 303 comments, 881 blanks, all 12004 lines
+
+Languages
++------------------+------------+------------+------------+------------+------------+
+| language         | files      | code       | comment    | blank      | total      |
++------------------+------------+------------+------------+------------+------------+
+| JavaScript JSX   |         24 |      4,166 |        118 |        434 |      4,718 |
+| PostCSS          |          2 |      4,014 |        228 |        681 |      4,923 |
+| JSON             |          2 |      3,714 |          0 |          2 |      3,716 |
+| XML              |          4 |         33 |          0 |          2 |         35 |
+| JavaScript       |          3 |         27 |          1 |          4 |         32 |
+| HTML             |          1 |         13 |          0 |          1 |         14 |
+| Markdown         |          1 |          9 |          0 |          8 |         17 |
+| pip requirements |          1 |        -39 |          0 |         -1 |        -40 |
+| Python           |          9 |     -1,117 |        -44 |       -250 |     -1,411 |
++------------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                            | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                               |         47 |     10,820 |        303 |        881 |     12,004 |
+| . (Files)                                                                       |          6 |      3,761 |          1 |         15 |      3,777 |
+| ..                                                                              |         10 |     -1,156 |        -44 |       -251 |     -1,451 |
+| ..\backend                                                                      |         10 |     -1,156 |        -44 |       -251 |     -1,451 |
+| ..\backend (Files)                                                              |          3 |       -425 |        -11 |        -76 |       -512 |
+| ..\backend\routes                                                               |          6 |       -660 |        -30 |       -158 |       -848 |
+| ..\backend\services                                                             |          1 |        -71 |         -3 |        -17 |        -91 |
+| public                                                                          |          2 |         31 |          0 |          1 |         32 |
+| src                                                                             |         29 |      8,184 |        346 |      1,116 |      9,646 |
+| src (Files)                                                                     |          4 |        150 |          0 |         17 |        167 |
+| src\assets                                                                      |          2 |          2 |          0 |          1 |          3 |
+| src\components                                                                  |          8 |        374 |          4 |         33 |        411 |
+| src\context                                                                     |          1 |         16 |          0 |          5 |         21 |
+| src\pages                                                                       |         13 |      3,728 |        114 |        391 |      4,233 |
+| src\styles                                                                      |          1 |      3,914 |        228 |        669 |      4,811 |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| filename                                                                        | language         | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| c:\Users\terez\Documents\adaptLearn\backend\app.py                              | Python           |       -262 |        -11 |        -49 |       -322 |
+| c:\Users\terez\Documents\adaptLearn\backend\models.py                           | Python           |       -124 |          0 |        -26 |       -150 |
+| c:\Users\terez\Documents\adaptLearn\backend\requirements.txt                    | pip requirements |        -39 |          0 |         -1 |        -40 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\__init__.py                  | Python           |          0 |          0 |         -1 |         -1 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\auth.py                      | Python           |       -213 |        -21 |        -44 |       -278 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\bookmarks.py                 | Python           |        -82 |         -1 |        -22 |       -105 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\courses.py                   | Python           |       -179 |         -1 |        -44 |       -224 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\sessions.py                  | Python           |       -126 |         -5 |        -27 |       -158 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\user.py                      | Python           |        -60 |         -2 |        -20 |        -82 |
+| c:\Users\terez\Documents\adaptLearn\backend\services\claude_service.py          | Python           |        -71 |         -3 |        -17 |        -91 |
+| c:\Users\terez\Documents\adaptLearn\frontend\README.md                          | Markdown         |          9 |          0 |          8 |         17 |
+| c:\Users\terez\Documents\adaptLearn\frontend\eslint.config.js                   | JavaScript       |         20 |          0 |          2 |         22 |
+| c:\Users\terez\Documents\adaptLearn\frontend\index.html                         | HTML             |         13 |          0 |          1 |         14 |
+| c:\Users\terez\Documents\adaptLearn\frontend\package-lock.json                  | JSON             |      3,685 |          0 |          1 |      3,686 |
+| c:\Users\terez\Documents\adaptLearn\frontend\package.json                       | JSON             |         29 |          0 |          1 |         30 |
+| c:\Users\terez\Documents\adaptLearn\frontend\public\favicon.svg                 | XML              |          7 |          0 |          0 |          7 |
+| c:\Users\terez\Documents\adaptLearn\frontend\public\icons.svg                   | XML              |         24 |          0 |          1 |         25 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\App.jsx                        | JavaScript JSX   |         39 |          0 |          4 |         43 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\api.js                         | JavaScript       |          2 |          0 |          0 |          2 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\assets\react.svg               | XML              |          1 |          0 |          0 |          1 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\assets\vite.svg                | XML              |          1 |          0 |          1 |          2 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\components\AttemptBanner.jsx   | JavaScript JSX   |          8 |          0 |          1 |          9 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\components\ExplanationCard.jsx | JavaScript JSX   |         26 |          0 |          1 |         27 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\components\Navbar.jsx          | JavaScript JSX   |        122 |          1 |          9 |        132 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\components\QuizCard.jsx        | JavaScript JSX   |        117 |          3 |         17 |        137 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\components\RAGRating.jsx       | JavaScript JSX   |         30 |          0 |          0 |         30 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\components\SkeletonCard.jsx    | JavaScript JSX   |         13 |          0 |          0 |         13 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\components\StyleSelector.jsx   | JavaScript JSX   |         27 |          0 |          1 |         28 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\components\TopicInput.jsx      | JavaScript JSX   |         31 |          0 |          4 |         35 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\context\ThemeContext.jsx       | JavaScript JSX   |         16 |          0 |          5 |         21 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\index.css                      | PostCSS          |        100 |          0 |         12 |        112 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\main.jsx                       | JavaScript JSX   |          9 |          0 |          1 |         10 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\Bookmarks.jsx            | JavaScript JSX   |        209 |          4 |         16 |        229 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\CourseBuilder.jsx        | JavaScript JSX   |        309 |         15 |         36 |        360 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\CourseDetail.jsx         | JavaScript JSX   |        641 |         15 |         53 |        709 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\Courses.jsx              | JavaScript JSX   |        137 |          1 |         10 |        148 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\Dashboard.jsx            | JavaScript JSX   |        334 |         10 |         41 |        385 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\History.jsx              | JavaScript JSX   |        271 |         12 |         30 |        313 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\Landing.jsx              | JavaScript JSX   |        150 |          6 |         14 |        170 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\Learn.jsx                | JavaScript JSX   |        543 |         16 |         44 |        603 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\Login.jsx                | JavaScript JSX   |         73 |          0 |         13 |         86 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\Onboarding.jsx           | JavaScript JSX   |        246 |          3 |         26 |        275 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\Register.jsx             | JavaScript JSX   |        191 |         10 |         35 |        236 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\SessionDetail.jsx        | JavaScript JSX   |        229 |         11 |         21 |        261 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\pages\Settings.jsx             | JavaScript JSX   |        395 |         11 |         52 |        458 |
+| c:\Users\terez\Documents\adaptLearn\frontend\src\styles\global.css              | PostCSS          |      3,914 |        228 |        669 |      4,811 |
+| c:\Users\terez\Documents\adaptLearn\frontend\vite.config.js                     | JavaScript       |          5 |          1 |          2 |          8 |
+| Total                                                                           |                  |     10,820 |        303 |        881 |     12,004 |
++---------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+

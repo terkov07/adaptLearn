@@ -242,7 +242,7 @@ export default function SessionDetail() {
           <button
             className="btn-primary"
             style={{ width: 'auto' }}
-            onClick={() => navigate('/learn')}
+            onClick={() => navigate('/learn', { state: { prefillTopic: session.topic } })}
           >
             Learn this topic again →
           </button>

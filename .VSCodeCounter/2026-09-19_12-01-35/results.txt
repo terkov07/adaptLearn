@@ -1,0 +1,38 @@
+Date : 2026-09-19 12:01:35
+Directory : c:\Users\terez\Documents\adaptLearn\backend
+Total : 10 files,  1156 codes, 44 comments, 251 blanks, all 1451 lines
+
+Languages
++------------------+------------+------------+------------+------------+------------+
+| language         | files      | code       | comment    | blank      | total      |
++------------------+------------+------------+------------+------------+------------+
+| Python           |          9 |      1,117 |         44 |        250 |      1,411 |
+| pip requirements |          1 |         39 |          0 |          1 |         40 |
++------------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                   | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                      |         10 |      1,156 |         44 |        251 |      1,451 |
+| . (Files)                                                              |          3 |        425 |         11 |         76 |        512 |
+| routes                                                                 |          6 |        660 |         30 |        158 |        848 |
+| services                                                               |          1 |         71 |          3 |         17 |         91 |
++------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| filename                                                               | language         | code       | comment    | blank      | total      |
++------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| c:\Users\terez\Documents\adaptLearn\backend\app.py                     | Python           |        262 |         11 |         49 |        322 |
+| c:\Users\terez\Documents\adaptLearn\backend\models.py                  | Python           |        124 |          0 |         26 |        150 |
+| c:\Users\terez\Documents\adaptLearn\backend\requirements.txt           | pip requirements |         39 |          0 |          1 |         40 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\__init__.py         | Python           |          0 |          0 |          1 |          1 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\auth.py             | Python           |        213 |         21 |         44 |        278 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\bookmarks.py        | Python           |         82 |          1 |         22 |        105 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\courses.py          | Python           |        179 |          1 |         44 |        224 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\sessions.py         | Python           |        126 |          5 |         27 |        158 |
+| c:\Users\terez\Documents\adaptLearn\backend\routes\user.py             | Python           |         60 |          2 |         20 |         82 |
+| c:\Users\terez\Documents\adaptLearn\backend\services\claude_service.py | Python           |         71 |          3 |         17 |         91 |
+| Total                                                                  |                  |      1,156 |         44 |        251 |      1,451 |
++------------------------------------------------------------------------+------------------+------------+------------+------------+------------+

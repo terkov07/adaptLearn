@@ -118,10 +118,11 @@ class Deadline(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
     course_topic_id = db.Column(db.Integer, db.ForeignKey('course_topics.id'), nullable=True)
-    type = db.Column(db.String, nullable=False)   # 'mock' | 'exam' | 'coursework' | 'reading' | 'essay'
+    type = db.Column(db.String, nullable=False)
     title = db.Column(db.String, nullable=False)
     due_date = db.Column(db.DateTime, nullable=False)
     estimated_minutes = db.Column(db.Integer)
+    completed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 

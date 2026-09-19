@@ -1,0 +1,11 @@
+"filename", "language", "pip requirements", "Python", "comment", "blank", "total"
+"c:\Users\terez\Documents\adaptLearn\backend\app.py", "Python", 0, 262, 11, 49, 322
+"c:\Users\terez\Documents\adaptLearn\backend\models.py", "Python", 0, 124, 0, 26, 150
+"c:\Users\terez\Documents\adaptLearn\backend\requirements.txt", "pip requirements", 39, 0, 0, 1, 40
+"c:\Users\terez\Documents\adaptLearn\backend\routes\__init__.py", "Python", 0, 0, 0, 1, 1
+"c:\Users\terez\Documents\adaptLearn\backend\routes\auth.py", "Python", 0, 213, 21, 44, 278
+"c:\Users\terez\Documents\adaptLearn\backend\routes\bookmarks.py", "Python", 0, 82, 1, 22, 105
+"c:\Users\terez\Documents\adaptLearn\backend\routes\courses.py", "Python", 0, 179, 1, 44, 224
+"c:\Users\terez\Documents\adaptLearn\backend\routes\sessions.py", "Python", 0, 126, 5, 27, 158
+"c:\Users\terez\Documents\adaptLearn\backend\routes\user.py", "Python", 0, 60, 2, 20, 82
+"Total", "-", 39, 1046, 41, 234, 1360

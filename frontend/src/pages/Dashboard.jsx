@@ -46,6 +46,10 @@ const LEVELS = [
   [0, 'Curious'], [100, 'Learner'], [300, 'Scholar'],
   [700, 'Thinker'], [1500, 'Expert'], [3000, 'Master']
 ]
+const STYLE_LABELS = {
+  analogy: 'Real-World Example', story: 'Picture / Story', steps: 'Step-by-step',
+  eli5: "Explain Like I'm 5", expert: 'Expert — My Level', expert_full: 'Expert — Full Detail',
+}
 
 function getLevel(xp) {
   let level = LEVELS[0], next = LEVELS[1]
@@ -196,7 +200,7 @@ export default function Dashboard() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                         <span className="db-session-topic">{activeSession?.topic}</span>
                         {activeSession?.style && (
-                          <span className="db-style-pill">{activeSession.style}</span>
+                          <span className="db-style-pill">{STYLE_LABELS[activeSession.style] || activeSession.style}</span>
                         )}
                       </div>
                       <span className="db-session-time">{timeAgo(activeSession?.started_at)}</span>
@@ -366,7 +370,7 @@ export default function Dashboard() {
                         <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>
                           {b.topic}
                         </span>
-                        {b.style && <span className="db-style-pill">{b.style}</span>}
+                        {b.style && <span className="db-style-pill">{STYLE_LABELS[b.style] || b.style}</span>}
                       </div>
                       <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.4 }}>
                         {b.text_preview?.slice(0, 80)}...

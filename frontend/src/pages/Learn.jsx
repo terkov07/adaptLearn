@@ -9,11 +9,20 @@ import AttemptBanner from '../components/AttemptBanner'
 import QuizCard from '../components/QuizCard'
 import Navbar from '../components/Navbar'
 import API_URL from '../api'
+import { useLocation } from 'react-router-dom'
 
-const STYLE_ORDER = ['analogy', 'story', 'steps', 'eli5', 'expert']
+const STYLE_ORDER = ['analogy', 'story', 'steps', 'eli5', 'expert', 'expert_full']
+const STYLE_LABELS = {
+  analogy: 'Real-World Example',
+  story: 'Picture / Story',
+  steps: 'Step-by-step',
+  eli5: "Explain Like I'm 5",
+  expert: 'Expert — My Level',
+  expert_full: 'Expert — Full Detail',
+}
 
 export default function Learn() {
-  const navigate = useNavigate()
+  
 
   const [user, setUser] = useState(null)
   const [selectedStyle, setSelectedStyle] = useState('analogy')
@@ -40,6 +49,12 @@ export default function Learn() {
   const [quizComplete, setQuizComplete] = useState(false)
   const [showPostQuizOptions ]= useState(false)
   const [postQuizRag, setPostQuizRag] = useState(null)
+
+  const navigate = useNavigate()
+  const location = useLocation()
+  useEffect(() => {
+    if (location.state?.prefillTopic) setCurrentTopic(location.state.prefillTopic)
+  }, [location.state])
 
   useEffect(() => {
     async function loadUser() {
@@ -232,7 +247,7 @@ export default function Learn() {
         {!explanation && !loading && (
           <div className="learn-input-section">
             <StyleSelector
-              selected={selectedStyle}
+              selected={STYLE_LABELS}
               onSelect={setSelectedStyle}
             />
             <TopicInput
@@ -252,14 +267,14 @@ export default function Learn() {
         {error && <p className="auth-error">{error}</p>}
 
         {attempt > 1 && (
-          <AttemptBanner attempt={attempt} style={selectedStyle} />
+          <AttemptBanner attempt={attempt} style={STYLE_LABELS} />
         )}
 
         {/* Loading */}
         {loading && (
           <div>
             <p className="loading-text">
-              Generating your {selectedStyle} explanation...
+              Generating your {STYLE_LABELS} explanation...
             </p>
             <SkeletonCard />
           </div>
@@ -270,7 +285,7 @@ export default function Learn() {
           <>
             <div className="explanation-card">
               <div className="explanation-header">
-                <span className="explanation-badge">{selectedStyle}</span>
+                <span className="explanation-badge">{STYLE_LABELS}</span>
                 {attempt > 1 && (
                   <span className="attempt-badge">Attempt {attempt}</span>
                 )}

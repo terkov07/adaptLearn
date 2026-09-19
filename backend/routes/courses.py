@@ -191,6 +191,7 @@ def get_deadlines(course_id):
         'title': d.title,
         'due_date': d.due_date.isoformat(),
         'estimated_minutes': d.estimated_minutes,
+        'completed': d.completed,
         'course_topic_id': d.course_topic_id,
     } for d in deadlines]})
 
@@ -222,3 +223,44 @@ def add_deadline(course_id):
     db.session.commit()
 
     return jsonify({'success': True, 'id': deadline.id}), 201
+
+@courses_bp.route('/api/courses/<int:course_id>/deadlines/<int:deadline_id>', methods=['PATCH'])
+def update_deadline(course_id, deadline_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    course = Course.query.filter_by(id=course_id, user_id=user_id).first()
+    if not course:
+        return jsonify({'error': 'Course not found'}), 404
+
+    deadline = Deadline.query.filter_by(id=deadline_id, course_id=course_id).first()
+    if not deadline:
+        return jsonify({'error': 'Deadline not found'}), 404
+
+    data = request.json
+    if 'completed' in data:
+        deadline.completed = data['completed']
+    db.session.commit()
+
+    return jsonify({'success': True})
+
+
+@courses_bp.route('/api/courses/<int:course_id>/deadlines/<int:deadline_id>', methods=['DELETE'])
+def delete_deadline(course_id, deadline_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    course = Course.query.filter_by(id=course_id, user_id=user_id).first()
+    if not course:
+        return jsonify({'error': 'Course not found'}), 404
+
+    deadline = Deadline.query.filter_by(id=deadline_id, course_id=course_id).first()
+    if not deadline:
+        return jsonify({'error': 'Deadline not found'}), 404
+
+    db.session.delete(deadline)
+    db.session.commit()
+
+    return jsonify({'success': True})

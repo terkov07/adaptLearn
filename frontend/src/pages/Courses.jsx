@@ -1,6 +1,7 @@
 import API_URL from '../api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Navbar from '../components/Navbar'
 
 
 export default function Courses() {
@@ -37,32 +38,11 @@ export default function Courses() {
 
   if (loading) return <div className="auth-loading">Loading courses...</div>
 
-  const nickname = user?.nickname || user?.name || ''
-  const initial = nickname[0]?.toUpperCase() || '?'
-  const xp = user?.stats?.xp || 0
-  const streak = user?.stats?.streak || 0
 
   return (
     <div className="dashboard">
-      <nav className="navbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-          <span className="navbar-logo" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }} onClick={() => navigate('/dashboard')}>
-            <img src="/favicon.png" alt="" style={{ width: 24, height: 24, borderRadius: 6 }} />
-            myadaptlearn
-          </span>
-          <div className="db-nav-links">
-            <button className="db-nav-link" onClick={() => navigate('/dashboard')}>Dashboard</button>
-            <button className="db-nav-link" onClick={() => navigate('/learn')}>Learn</button>
-            <button className="db-nav-link db-nav-link-active" onClick={() => navigate('/courses')}>Courses</button>
-            <button className="db-nav-link" onClick={() => navigate('/history')}>History</button>
-          </div>
-        </div>
-        <div className="navbar-right">
-          {streak > 0 && <span className="streak-badge">🔥 {streak}-day streak</span>}
-          <span className="xp-badge">{xp} XP</span>
-          <button className="navbar-avatar" onClick={() => navigate('/settings')}>{initial}</button>
-        </div>
-      </nav>
+      {/* Navbar */}
+    <Navbar user={user} />
 
       <div className="db-content">
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>

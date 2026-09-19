@@ -279,7 +279,7 @@ export default function History() {
         <button
           className="btn-primary"
           style={{ width: 'auto', marginTop: 16 }}
-          onClick={() => navigate('/learn')}
+          onClick={() => navigate('/learn', { state: { prefillTopic: s.topic } })}
         >
           Learn this topic again →
         </button>

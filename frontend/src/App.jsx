@@ -13,6 +13,8 @@ import Landing from './pages/Landing'
 import Courses from './pages/Courses'
 import CourseBuilder from './pages/CourseBuilder'
 import CourseDetail from './pages/CourseDetail'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsOfUse from './pages/TermsOfUse'
 
 
 
@@ -34,6 +36,8 @@ function App() {
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/new" element={<CourseBuilder />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfUse />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

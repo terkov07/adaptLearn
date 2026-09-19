@@ -159,8 +159,12 @@ export default function Landing() {
               Create your free account
             </button>
           </div>
-          <div className="landing-footer-note">
-            AdaptLearn · A personalised learning experiment
+         <div className="landing-footer-note">
+            myadaptlearn · A personalised learning experiment
+            <div style={{ marginTop: 8, fontSize: 13 }}>
+              <a href="/privacy" style={{ color: 'inherit', marginRight: 16 }}>Privacy Policy</a>
+              <a href="/terms" style={{ color: 'inherit' }}>Terms of Use</a>
+            </div>
           </div>
         </section>
 

@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
+import API_URL from '../api'
 
 export default function Navbar({ user, showBack, backTo, backLabel }) {
   const navigate = useNavigate()
@@ -24,6 +25,11 @@ export default function Navbar({ user, showBack, backTo, backLabel }) {
     { label: 'Courses', path: '/courses' },
     { label: 'History', path: '/history' },
   ]
+
+  async function handleLogout() {
+  await fetch(`${API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' })
+  navigate('/login')
+}
 
   return (
     <>
@@ -77,7 +83,7 @@ export default function Navbar({ user, showBack, backTo, backLabel }) {
           <button className="theme-toggle" onClick={cycleTheme} title="Switch theme">
             <div className="theme-toggle-icon" />
           </button>
-          {nickname && (
+                    {nickname && (
             <button
               className="navbar-avatar"
               onClick={() => navigate('/settings')}
@@ -86,8 +92,11 @@ export default function Navbar({ user, showBack, backTo, backLabel }) {
               {initial}
             </button>
           )}
+          <button onClick={handleLogout}>Log out</button>
         </div>
       </nav>
+
+      {/* Bottom navigation — mobile only */}
 
       {/* Bottom navigation — mobile only */}
       <nav className="bottom-nav">
