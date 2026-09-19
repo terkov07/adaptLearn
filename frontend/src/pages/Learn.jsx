@@ -247,7 +247,7 @@ export default function Learn() {
         {!explanation && !loading && (
           <div className="learn-input-section">
             <StyleSelector
-              selected={STYLE_LABELS}
+              selected={selectedStyle}
               onSelect={setSelectedStyle}
             />
             <TopicInput
@@ -268,14 +268,14 @@ export default function Learn() {
         {error && <p className="auth-error">{error}</p>}
 
         {attempt > 1 && (
-          <AttemptBanner attempt={attempt} style={STYLE_LABELS} />
+          <AttemptBanner attempt={attempt} style={STYLE_LABELS[selectedStyle]} />
         )}
 
         {/* Loading */}
         {loading && (
           <div>
             <p className="loading-text">
-              Generating your {STYLE_LABELS} explanation...
+              Generating your {STYLE_LABELS[selectedStyle]} explanation...
             </p>
             <SkeletonCard />
           </div>
@@ -286,7 +286,7 @@ export default function Learn() {
           <>
             <div className="explanation-card">
               <div className="explanation-header">
-                <span className="explanation-badge">{STYLE_LABELS}</span>
+                <span className="explanation-badge">{STYLE_LABELS[selectedStyle]}</span>
                 {attempt > 1 && (
                   <span className="attempt-badge">Attempt {attempt}</span>
                 )}
