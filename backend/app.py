@@ -50,7 +50,7 @@ def explain():
     if not data.get('style'):
         return jsonify({'error': 'Style is required'}), 400
 
-        topic = data['topic']
+    topic = data['topic']
     style = data['style']
     education_level = data.get('education_level')
     doc_text = data.get('doc_text')
