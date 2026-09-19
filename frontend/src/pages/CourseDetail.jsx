@@ -183,34 +183,39 @@ useEffect(() => {
   const meta = TYPE_META[d.type] || { label: d.type, color: '#8A8FA3' }
   const isUrgent = d.type === 'exam' || d.type === 'mock'
   return (
-    <div key={d.id} style={{ fontSize: 13, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-      <input
-        type="checkbox"
-        checked={d.completed}
-        onChange={() => toggleDeadline(d.id, d.completed)}
-        style={{ flexShrink: 0 }}
-      />
-      <span style={{
-        fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px',
-        color: '#fff', background: meta.color, borderRadius: 4, padding: '2px 6px', flexShrink: 0,
-        opacity: d.completed ? 0.5 : 1,
-      }}>
-        {meta.label}
-      </span>
-      <span style={{
-        fontWeight: isUrgent ? 700 : 400, flexGrow: 1,
-        textDecoration: d.completed ? 'line-through' : 'none',
-        opacity: d.completed ? 0.5 : 1,
-      }}>
-        {d.title}
-      </span>
-      <span style={{ color: '#888', flexShrink: 0 }}>{new Date(d.due_date).toLocaleDateString()}</span>
-      <button
-        onClick={() => removeDeadline(d.id)}
-        style={{ background: 'none', border: 'none', color: '#c0392b', cursor: 'pointer', fontSize: 14, flexShrink: 0, padding: '0 4px' }}
-      >
-        ×
-      </button>
+    <div key={d.id} style={{ marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <input
+          type="checkbox"
+          checked={d.completed}
+          onChange={() => toggleDeadline(d.id, d.completed)}
+          style={{ flexShrink: 0 }}
+        />
+        <span style={{
+          fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px',
+          color: '#fff', background: meta.color, borderRadius: 4, padding: '2px 6px', flexShrink: 0,
+          opacity: d.completed ? 0.5 : 1,
+        }}>
+          {meta.label}
+        </span>
+        <span style={{
+          fontSize: 13, fontWeight: isUrgent ? 700 : 400, flexGrow: 1,
+          textDecoration: d.completed ? 'line-through' : 'none',
+          opacity: d.completed ? 0.5 : 1,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {d.title}
+        </span>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginLeft: 24, marginTop: 2 }}>
+        <span style={{ fontSize: 12, color: '#888' }}>{new Date(d.due_date).toLocaleDateString()}</span>
+        <button
+          onClick={() => removeDeadline(d.id)}
+          style={{ background: 'none', border: 'none', color: '#c0392b', cursor: 'pointer', fontSize: 15, padding: '0 4px', fontWeight: 700 }}
+        >
+          ×
+        </button>
+      </div>
     </div>
   )
 })}

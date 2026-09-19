@@ -73,20 +73,20 @@ const QUESTIONS = [
 
 const STYLE_INFO = {
   analogy: {
-    name: 'Analogy',
+    name: 'Real-World Example',
     icon: '🔗',
     tagline: 'You understand the unknown through the known.',
     description: 'You build understanding by connecting new ideas to things you already know well. When someone says "it\'s like a...", your brain lights up. You process information by finding familiar structures to hang new concepts on.',
     strengths: ['Excellent at transferring knowledge between domains', 'Strong intuitive grasp of abstract concepts', 'Naturally builds rich mental models'],
-    tip: 'When an analogy explanation finishes, ask yourself: "what does this comparison miss?" — that gap reveals the most important nuance.',
+    tip: 'When a real-world example finishes, ask yourself: "what does this comparison miss?" — that gap reveals the most important nuance.',
   },
   story: {
-    name: 'Story',
+    name: 'Picture / Story',
     icon: '📖',
-    tagline: 'You understand through narrative and meaning.',
-    description: 'Your brain naturally encodes information through narrative structure — characters, causality, and consequence. You remember things better when they have a story arc. Abstract information comes alive for you when it has a protagonist.',
-    strengths: ['Strong emotional memory for learning', 'Excellent long-term retention of narrative-encoded information', 'Natural ability to explain things to others'],
-    tip: 'After a story explanation, try retelling it in your own words to someone else — even imagining doing so. This cements the narrative in memory.',
+    tagline: 'You understand through narrative and imagery.',
+    description: 'Your brain naturally encodes information through narrative structure and vivid imagery — characters, scenes, causality, and consequence. You remember things better when you can picture them happening. Abstract information comes alive for you when it has a scene, not just a definition.',
+    strengths: ['Strong emotional and visual memory for learning', 'Excellent long-term retention of narrative-encoded information', 'Natural ability to explain things to others'],
+    tip: 'After a Picture/Story explanation, try picturing the scene again from memory before you check your notes. This cements the imagery.',
   },
   steps: {
     name: 'Step-by-step',
@@ -97,23 +97,30 @@ const STYLE_INFO = {
     tip: 'With step-by-step explanations, pause after each step and check you can explain it before moving on. Your sequential processing style means this pays off significantly.',
   },
   eli5: {
-    name: 'ELI5',
+    name: "Explain Like I'm 5",
     icon: '💬',
     tagline: 'You understand best when complexity is stripped away.',
     description: 'You have a low tolerance for unnecessary complexity and jargon — not because you lack ability, but because you know that genuine understanding should be expressible simply. You\'re often more capable than standard explanations give you credit for.',
     strengths: ['Strong intuition for when something is genuinely understood vs memorised', 'Excellent at identifying the core of a concept', 'Great at explaining things to others in accessible terms'],
-    tip: 'Once an ELI5 explanation clicks, try asking for the Expert version of the same topic. You may find you understand more technical language than you expected now that you have the core idea.',
+    tip: 'Once an Explain Like I\'m 5 explanation clicks, try asking for the Expert — My Level version of the same topic. You may find you understand more technical language than you expected now that you have the core idea.',
   },
   expert: {
-    name: 'Expert',
+    name: 'Expert — My Level',
     icon: '🎓',
     tagline: 'You understand through precision and depth.',
     description: 'You are comfortable with technical language and actively prefer explanations that don\'t simplify away important nuance. Oversimplification frustrates you more than complexity does. You likely have significant prior knowledge in at least some domains.',
     strengths: ['Strong analytical and critical thinking', 'Comfortable with ambiguity and nuance', 'Excellent at building on existing knowledge structures'],
-    tip: 'Expert explanations sometimes assume knowledge you don\'t have. If one doesn\'t click, try Analogy style — not because you need it simple, but because a well-chosen analogy can bridge a specific knowledge gap efficiently.',
+    tip: 'Expert — My Level explanations sometimes assume knowledge you don\'t have. If one doesn\'t click, try Real-World Example — not because you need it simple, but because a well-chosen example can bridge a specific knowledge gap efficiently.',
+  },
+  expert_full: {
+    name: 'Expert — Full Detail',
+    icon: '🔬',
+    tagline: 'You want the whole picture, not just the syllabus version.',
+    description: 'Curriculum-level explanations feel like they\'re holding something back for you. You\'d rather understand a topic properly — edge cases, technical nuance, and all — than get a simplified version that leaves you with lingering questions. You\'re comfortable going beyond what\'s strictly required.',
+    strengths: ['Genuine curiosity that extends past what\'s examined', 'Comfortable sitting with unresolved complexity', 'Builds unusually deep understanding of topics you care about'],
+    tip: 'Full Detail explanations can go further than your exam actually requires — worth checking back against your specification afterward so you know which parts are core knowledge versus genuinely extra.',
   },
 }
-
 export default function Onboarding() {
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
