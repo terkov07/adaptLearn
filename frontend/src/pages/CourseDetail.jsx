@@ -5,135 +5,135 @@ import API_URL from '../api'
 import QuizCard from '../components/QuizCard'
 import Navbar from '../components/Navbar'
 
-// ─── Main CourseDetail page ───────────────────────────────────────────────────
-export default function CourseDetail() {
-  
-  const { id } = useParams()
-  const navigate = useNavigate()
-  
-
-  const [course, setCourse] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [activeTopic, setActiveTopic] = useState(null)
-  const [autoAdvance, setAutoAdvance] = useState(true)
-  const [deadlines, setDeadlines] = useState([])
-  const [showAddDeadline, setShowAddDeadline] = useState(false)
-  const [newDeadline, setNewDeadline] = useState({ type: 'exam', title: '', due_date: '' })
-  const [user, setUser] = useState(null)
-
-  const TYPE_META = {
+const TYPE_META = {
   exam:       { label: 'Exam',       color: '#E8735C' },
   mock:       { label: 'Mock',       color: '#F2A65A' },
   coursework: { label: 'Coursework', color: '#5B4EC8' },
   essay:      { label: 'Essay',      color: '#5B4EC8' },
   reading:    { label: 'Reading',    color: '#8A8FA3' },
 }
-async function loadDeadlines() {
-  try {
-    const res = await fetch(`${API_URL}/api/courses/${id}/deadlines`, { credentials: 'include' })
-    const data = await res.json()
-    setDeadlines(res.ok ? (data.deadlines || []) : [])
-  } catch {
-    setDeadlines([])
-  }
-}
 
-async function addDeadline() {
-  if (!newDeadline.title || !newDeadline.due_date) {
-    alert('Please fill in both a title and a full date + time.')
-    return
-  }
-  try {
-    await fetch(`${API_URL}/api/courses/${id}/deadlines`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(newDeadline)
-    })
-    setNewDeadline({ type: 'exam', title: '', due_date: '' })
-    setShowAddDeadline(false)
-    loadDeadlines()
-  } catch {
-    console.error('Failed to add deadline')
-  }
-}
+// ─── Main CourseDetail page ───────────────────────────────────────────────────
+export default function CourseDetail() {
+  const { id } = useParams()
+  const navigate = useNavigate()
 
-async function toggleDeadline(deadlineId, currentlyCompleted) {
-  try {
-    await fetch(`${API_URL}/api/courses/${id}/deadlines/${deadlineId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ completed: !currentlyCompleted })
-    })
-    loadDeadlines()
-  } catch {
-    console.error('Failed to update deadline')
-  }
-}
+  const [user, setUser] = useState(null)
+  const [course, setCourse] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [activeTopic, setActiveTopic] = useState(null)
+  const [autoAdvance, setAutoAdvance] = useState(true)
+  const [deadlines, setDeadlines] = useState([])
+  const [showAddDeadline, setShowAddDeadline] = useState(false)
+  const [showDeadlinesPanel, setShowDeadlinesPanel] = useState(false)
+  const [showTopicList, setShowTopicList] = useState(window.innerWidth > 768)
+  const [newDeadline, setNewDeadline] = useState({ type: 'exam', title: '', due_date: '' })
 
-async function removeDeadline(deadlineId) {
-  try {
-    await fetch(`${API_URL}/api/courses/${id}/deadlines/${deadlineId}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-    loadDeadlines()
-  } catch {
-    console.error('Failed to remove deadline')
-  }
-}
-
-async function deleteCourse() {
-  if (!window.confirm('Delete this course, its topics and deadlines? This cannot be undone.')) return
-  try {
-    const res = await fetch(`${API_URL}/api/courses/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    })
-    if (res.ok) navigate('/courses')
-    else alert('Could not delete the course.')
-  } catch {
-    alert('Could not connect to server.')
-  }
-}
-
-  
-useEffect(() => {
-  async function load() {
+  async function loadDeadlines() {
     try {
-      const res = await fetch(`${API_URL}/api/courses/${id}`, {
+      const res = await fetch(`${API_URL}/api/courses/${id}/deadlines`, { credentials: 'include' })
+      const data = await res.json()
+      setDeadlines(res.ok ? (data.deadlines || []) : [])
+    } catch {
+      setDeadlines([])
+    }
+  }
+
+  async function addDeadline() {
+    if (!newDeadline.title || !newDeadline.due_date) {
+      alert('Please fill in both a title and a full date + time.')
+      return
+    }
+    try {
+      await fetch(`${API_URL}/api/courses/${id}/deadlines`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newDeadline)
+      })
+      setNewDeadline({ type: 'exam', title: '', due_date: '' })
+      setShowAddDeadline(false)
+      loadDeadlines()
+    } catch {
+      console.error('Failed to add deadline')
+    }
+  }
+
+  async function toggleDeadline(deadlineId, currentlyCompleted) {
+    try {
+      await fetch(`${API_URL}/api/courses/${id}/deadlines/${deadlineId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ completed: !currentlyCompleted })
+      })
+      loadDeadlines()
+    } catch {
+      console.error('Failed to update deadline')
+    }
+  }
+
+  async function removeDeadline(deadlineId) {
+    try {
+      await fetch(`${API_URL}/api/courses/${id}/deadlines/${deadlineId}`, {
+        method: 'DELETE',
         credentials: 'include'
       })
-      if (!res.ok) { navigate('/courses'); return }
-      const data = await res.json()
-      setCourse(data.course)
       loadDeadlines()
-      const firstIncomplete = data.course.topics.find(t => t.status !== 'complete')
-      if (firstIncomplete) setActiveTopic(firstIncomplete)
     } catch {
-      navigate('/courses')
-    } finally {
-      setLoading(false)
+      console.error('Failed to remove deadline')
     }
   }
-  load()
-}, [id, navigate])
 
-useEffect(() => {
-  async function loadUser() {
+  async function deleteCourse() {
+    if (!window.confirm('Delete this course, its topics and deadlines? This cannot be undone.')) return
     try {
-      const res = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' })
-      if (res.ok) {
-        const data = await res.json()
-        setUser(data.user)
-      }
+      const res = await fetch(`${API_URL}/api/courses/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      if (res.ok) navigate('/courses')
+      else alert('Could not delete the course.')
     } catch {
-      // navbar still renders without a user
+      alert('Could not connect to server.')
     }
   }
-  loadUser()
-}, [])
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch(`${API_URL}/api/courses/${id}`, {
+          credentials: 'include'
+        })
+        if (!res.ok) { navigate('/courses'); return }
+        const data = await res.json()
+        setCourse(data.course)
+        loadDeadlines()
+        const firstIncomplete = data.course.topics.find(t => t.status !== 'complete')
+        if (firstIncomplete) setActiveTopic(firstIncomplete)
+      } catch {
+        navigate('/courses')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [id, navigate])
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' })
+        if (res.ok) {
+          const data = await res.json()
+          setUser(data.user)
+        }
+      } catch {
+        // navbar still renders without a user
+      }
+    }
+    loadUser()
+  }, [])
 
   async function markTopicComplete(topicId) {
     try {
@@ -168,13 +168,19 @@ useEffect(() => {
 
   return (
     <div className="dashboard">
-    <Navbar user={user} />
-    <button className="new-topic-btn" style={{ margin: '12px 16px' }} onClick={() => navigate('/courses')}>
-  ← Courses
-    </button>
+      <Navbar user={user} />
+
+      <button
+        className="new-topic-btn"
+        style={{ margin: '12px 16px' }}
+        onClick={() => navigate('/courses')}
+      >
+        ← Courses
+      </button>
+
       <div className="cd-layout">
 
-        {/* Sidebar checklist */}
+        {/* Sidebar */}
         <div className="cd-sidebar">
           <div className="cd-sidebar-header">
             <div className="cd-course-title">{course.title}</div>
@@ -196,118 +202,147 @@ useEffect(() => {
               <span className="settings-toggle-knob" style={{ width: 16, height: 16 }} />
             </button>
           </div>
+
+          {/* Deadlines (collapsible) */}
           <div style={{ padding: '0 16px 16px', borderBottom: '1px solid #eee', marginBottom: 12 }}>
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-    <span className="settings-toggle-label" style={{ fontSize: 13 }}>Deadlines</span>
-    <button className="btn-ghost" style={{ width: 'auto', padding: '2px 10px', fontSize: 12 }}
-      onClick={() => setShowAddDeadline(!showAddDeadline)}>
-      {showAddDeadline ? 'Cancel' : '+ Add'}
-    </button>
-  </div>
-
-
-
-{deadlines.map(d => {
-  const meta = TYPE_META[d.type] || { label: d.type, color: '#8A8FA3' }
-  const isUrgent = d.type === 'exam' || d.type === 'mock'
-  return (
-    <div key={d.id} style={{ marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <input
-          type="checkbox"
-          checked={d.completed}
-          onChange={() => toggleDeadline(d.id, d.completed)}
-          style={{ flexShrink: 0 }}
-        />
-        <span style={{
-          fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px',
-          color: '#fff', background: meta.color, borderRadius: 4, padding: '2px 6px', flexShrink: 0,
-          opacity: d.completed ? 0.5 : 1,
-        }}>
-          {meta.label}
-        </span>
-        <span style={{
-          fontSize: 13, fontWeight: isUrgent ? 700 : 400, flexGrow: 1,
-          textDecoration: d.completed ? 'line-through' : 'none',
-          opacity: d.completed ? 0.5 : 1,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
-          {d.title}
-        </span>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginLeft: 24, marginTop: 2 }}>
-        <span style={{ fontSize: 12, color: '#888' }}>{new Date(d.due_date).toLocaleDateString()}</span>
-        <button
-          onClick={() => removeDeadline(d.id)}
-          style={{ background: 'none', border: 'none', color: '#c0392b', cursor: 'pointer', fontSize: 15, padding: '0 4px', fontWeight: 700 }}
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  )
-})}
-
-  {showAddDeadline && (
-  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-    <select
-      value={newDeadline.type}
-      onChange={e => setNewDeadline({ ...newDeadline, type: e.target.value })}
-      className="topic-input"
-    >
-      <option value="exam">Exam</option>
-      <option value="mock">Mock</option>
-      <option value="coursework">Coursework</option>
-      <option value="reading">Reading</option>
-      <option value="essay">Essay</option>
-    </select>
-    <input placeholder="Title" value={newDeadline.title}
-      onChange={e => setNewDeadline({ ...newDeadline, title: e.target.value })}
-      className="topic-input" />
-    <input type="datetime-local" value={newDeadline.due_date}
-      onChange={e => setNewDeadline({ ...newDeadline, due_date: e.target.value })}
-      className="topic-input" />
-    <button className="btn-primary" style={{ marginTop: 4 }} onClick={addDeadline}>Save</button>
-  </div>
-)}
-</div>
-
-          <div className="cd-topics">
-            {course.topics.map(t => (
-              <button
-                key={t.id}
-                className={`cd-topic-btn ${activeTopic?.id === t.id ? 'cd-topic-active' : ''} ${t.status === 'complete' ? 'cd-topic-done' : ''}`}
-                onClick={() => setActiveTopic(t)}
-              >
-                <span className="cd-topic-icon">
-                  {t.status === 'complete' ? '✓' : activeTopic?.id === t.id ? '▶' : '○'}
-                </span>
-                <span className="cd-topic-name">{t.title}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <button className="cd-section-toggle" onClick={() => setShowDeadlinesPanel(!showDeadlinesPanel)}>
+                {showDeadlinesPanel ? '▾' : '▸'} Deadlines ({deadlines.length})
               </button>
-            ))}
+              <button
+                className="btn-ghost"
+                style={{ width: 'auto', padding: '2px 10px', fontSize: 12 }}
+                onClick={() => { setShowDeadlinesPanel(true); setShowAddDeadline(!showAddDeadline) }}
+              >
+                {showAddDeadline ? 'Cancel' : '+ Add'}
+              </button>
+            </div>
+
+            {showDeadlinesPanel && (
+              <>
+                {deadlines.map(d => {
+                  const meta = TYPE_META[d.type] || { label: d.type, color: '#8A8FA3' }
+                  const isUrgent = d.type === 'exam' || d.type === 'mock'
+                  return (
+                    <div key={d.id} style={{ marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input
+                          type="checkbox"
+                          checked={d.completed}
+                          onChange={() => toggleDeadline(d.id, d.completed)}
+                          style={{ flexShrink: 0 }}
+                        />
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px',
+                          color: '#fff', background: meta.color, borderRadius: 4, padding: '2px 6px', flexShrink: 0,
+                          opacity: d.completed ? 0.5 : 1,
+                        }}>
+                          {meta.label}
+                        </span>
+                        <span style={{
+                          fontSize: 13, fontWeight: isUrgent ? 700 : 400, flexGrow: 1,
+                          textDecoration: d.completed ? 'line-through' : 'none',
+                          opacity: d.completed ? 0.5 : 1,
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {d.title}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginLeft: 24, marginTop: 2 }}>
+                        <span style={{ fontSize: 12, color: '#888' }}>{new Date(d.due_date).toLocaleDateString()}</span>
+                        <button
+                          onClick={() => removeDeadline(d.id)}
+                          style={{ background: 'none', border: 'none', color: '#c0392b', cursor: 'pointer', fontSize: 15, padding: '0 4px', fontWeight: 700 }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+
+                {showAddDeadline && (
+                  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <select
+                      value={newDeadline.type}
+                      onChange={e => setNewDeadline({ ...newDeadline, type: e.target.value })}
+                      className="topic-input"
+                    >
+                      <option value="exam">Exam</option>
+                      <option value="mock">Mock</option>
+                      <option value="coursework">Coursework</option>
+                      <option value="reading">Reading</option>
+                      <option value="essay">Essay</option>
+                    </select>
+                    <input
+                      placeholder="Title"
+                      value={newDeadline.title}
+                      onChange={e => setNewDeadline({ ...newDeadline, title: e.target.value })}
+                      className="topic-input"
+                    />
+                    <input
+                      type="datetime-local"
+                      value={newDeadline.due_date}
+                      onChange={e => setNewDeadline({ ...newDeadline, due_date: e.target.value })}
+                      className="topic-input"
+                    />
+                    <button className="btn-primary" style={{ marginTop: 4 }} onClick={addDeadline}>Save</button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
+
+          {/* Topic list (collapsible) */}
+          <button
+            className="cd-section-toggle"
+            style={{ margin: '0 16px 8px' }}
+            onClick={() => setShowTopicList(!showTopicList)}
+          >
+            {showTopicList ? '▾' : '▸'} Topics ({completed}/{total})
+          </button>
+          {showTopicList && (
+            <div className="cd-topics">
+              {course.topics.map(t => (
+                <button
+                  key={t.id}
+                  className={`cd-topic-btn ${activeTopic?.id === t.id ? 'cd-topic-active' : ''} ${t.status === 'complete' ? 'cd-topic-done' : ''}`}
+                  onClick={() => {
+                    setActiveTopic(t)
+                    if (window.innerWidth <= 768) setShowTopicList(false)
+                  }}
+                >
+                  <span className="cd-topic-icon">
+                    {t.status === 'complete' ? '✓' : activeTopic?.id === t.id ? '▶' : '○'}
+                  </span>
+                  <span className="cd-topic-name">{t.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Main content */}
-          <div className="cd-main">
+        <div className="cd-main">
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-  <button
-    className="btn-ghost"
-    style={{
-  width: 'auto',
-  color: '#C0392B',
-  background: '#FDECEA',
-  border: '1.5px solid #C0392B',
-  fontWeight: 700,
-  fontSize: 13,
-  padding: '6px 14px',
-  borderRadius: 8,
-}}
-    onClick={deleteCourse}
-  >
-    Delete course
-  </button>
-</div>
+            <button
+              className="btn-ghost"
+              style={{
+                width: 'auto',
+                color: '#C0392B',
+                background: '#FDECEA',
+                border: '1.5px solid #C0392B',
+                fontWeight: 700,
+                fontSize: 13,
+                padding: '6px 14px',
+                borderRadius: 8,
+              }}
+              onClick={deleteCourse}
+            >
+              Delete course
+            </button>
+          </div>
+
           {activeTopic ? (
             <div>
               <div className="cd-active-header">
@@ -315,14 +350,14 @@ useEffect(() => {
                 <h2 className="cd-active-topic">{activeTopic.title}</h2>
               </div>
               <CourseLearner
-                  key={activeTopic.id}
-                  topic={activeTopic}
-                  docText={course.doc_text}
-                  educationLevel={course.level}
-                  examBoard={course.exam_board}
-                  specCode={course.spec_code}
-                  onComplete={() => markTopicComplete(activeTopic.id)}
-                />
+                key={activeTopic.id}
+                topic={activeTopic}
+                docText={course.doc_text}
+                educationLevel={course.level}
+                examBoard={course.exam_board}
+                specCode={course.spec_code}
+                onComplete={() => markTopicComplete(activeTopic.id)}
+              />
             </div>
           ) : (
             <div className="cd-complete-state">
@@ -388,6 +423,7 @@ function CourseLearner({ topic, docText, educationLevel, examBoard, specCode, on
   // key prop on CourseLearner handles reset when topic changes — no useEffect needed
 
   async function explainTopic(style, attemptNum, used) {
+    setSelectedStyle(style)
     setLoadingExp(true)
     setExplanation(null)
     setError('')
@@ -469,7 +505,11 @@ function CourseLearner({ topic, docText, educationLevel, examBoard, specCode, on
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ explanation_text: explanation, num_questions: numQuestions, education_level: educationLevel || null })
+        body: JSON.stringify({
+          explanation_text: explanation,
+          num_questions: numQuestions,
+          education_level: educationLevel || null,
+        })
       })
       const data = await res.json()
       setQuestions(res.ok ? (data.questions || []) : [])
@@ -607,7 +647,7 @@ function CourseLearner({ topic, docText, educationLevel, examBoard, specCode, on
           {showAmberChoice && (
             <div className="rag-wrap">
               <p className="rag-label">You partially got it — what would you like to do?</p>
-              <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 <button className="btn-primary" style={{ width: 'auto' }}
                   onClick={() => { setShowAmberChoice(false); setShowQuizPicker(true) }}>
                   Test what I understood →
@@ -714,4 +754,3 @@ function CourseLearner({ topic, docText, educationLevel, examBoard, specCode, on
     </div>
   )
 }
-

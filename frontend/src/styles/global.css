@@ -4805,3 +4805,47 @@ body {
   display: none;
   }
 }
+
+.cd-section-toggle {
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1A2744;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .cd-layout {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .cd-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    position: static !important;
+    border-right: none !important;
+  }
+  .cd-topics {
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .cd-main {
+    width: 100% !important;
+    padding: 16px !important;
+  }
+  /* all six styles visible with no scrolling: two columns */
+  .style-options {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    overflow: visible !important;
+  }
+  .style-option {
+    min-width: 0 !important;
+    width: 100%;
+  }
+}
