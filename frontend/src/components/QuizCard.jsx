@@ -6,62 +6,48 @@ export default function QuizCard({ questions, onComplete, onSkip, explanationId 
   const [answers, setAnswers] = useState([])
   const [selected, setSelected] = useState(null)
   const [answered, setAnswered] = useState(false)
-  const [done, setDone] = useState(false)
 
   const currentQuestion = questions[currentIndex]
+  const isLast = currentIndex >= questions.length - 1
+  const explanations = currentQuestion.explanations || []
 
   function handleSelect(index) {
     if (answered) return
     setSelected(index)
   }
 
- function handleSubmit() {
-  if (selected === null) return
-  setAnswered(true)
-
-  const newAnswers = [...answers, selected]
-  setAnswers(newAnswers)
-
-  // check if last question
-  if (currentIndex >= questions.length - 1) {
-  const newAnswers = [...answers, selected]
-  setAnswers(newAnswers)
-  setAnswered(true)
-
-  const correct = newAnswers.filter(
-    (ans, i) => ans === questions[i].correct_index
-  ).length
-  const pct = Math.round((correct / questions.length) * 100)
-
-  // save to database
-  if (explanationId) {
-    fetch(`${API_URL}/api/quiz/submit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        explanation_id: explanationId,
-        questions: questions,
-        answers: newAnswers
-      })
-    })
+  function handleSubmit() {
+    if (selected === null) return
+    setAnswered(true)
+    setAnswers([...answers, selected])
   }
 
-  setTimeout(() => {
-    setDone(true)
-    onComplete(pct, newAnswers)
-  }, 1200)
-}
-  // if not last — wait for Next button
-}
+  function handleNext() {
+    setCurrentIndex(currentIndex + 1)
+    setSelected(null)
+    setAnswered(false)
+  }
 
-function handleNext() {
-  setCurrentIndex(currentIndex + 1)
-  setSelected(null)
-  setAnswered(false)
-}
+  function handleFinish() {
+    const correct = answers.filter(
+      (ans, i) => ans === questions[i].correct_index
+    ).length
+    const pct = Math.round((correct / questions.length) * 100)
 
-  if (done) return null
+    if (explanationId) {
+      fetch(`${API_URL}/api/quiz/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          explanation_id: explanationId,
+          questions: questions,
+          answers: answers,
+        }),
+      })
+    }
+    onComplete(pct, answers)
+  }
 
   const isCorrect = answered && selected === currentQuestion.correct_index
 
@@ -115,23 +101,34 @@ function handleNext() {
       )}
 
       {answered && (
-  <>
-    <p className={`quiz-feedback ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`}>
-      {isCorrect
-        ? '✓ Correct!'
-        : `✗ The correct answer was: ${currentQuestion.options[currentQuestion.correct_index]}`}
-    </p>
-    {currentIndex < questions.length - 1 && (
-      <button
-        className="btn-primary"
-        style={{ marginTop: 12, width: 'auto' }}
-        onClick={handleNext}
-      >
-        Next question →
-      </button>
-    )}
-  </>
-)}
+        <>
+          <p className={`quiz-feedback ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`}>
+            {isCorrect ? '✓ Correct!' : '✗ Not quite'}
+          </p>
+
+          <div className="quiz-why">
+            {!isCorrect && explanations[selected] && (
+              <p>
+                <strong>Why your answer wasn't right:</strong> {explanations[selected]}
+              </p>
+            )}
+            <p>
+              <strong>
+                {isCorrect ? 'Why this is right:' : `The correct answer is "${currentQuestion.options[currentQuestion.correct_index]}":`}
+              </strong>{' '}
+              {explanations[currentQuestion.correct_index] || ''}
+            </p>
+          </div>
+
+          <button
+            className="btn-primary"
+            style={{ marginTop: 12, width: 'auto' }}
+            onClick={isLast ? handleFinish : handleNext}
+          >
+            {isLast ? 'See results →' : 'Next question →'}
+          </button>
+        </>
+      )}
     </div>
   )
 }

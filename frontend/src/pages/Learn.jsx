@@ -23,12 +23,15 @@ const STYLE_LABELS = {
 
 export default function Learn() {
   
-
+  const [hideExplanation, setHideExplanation] = useState(false)
+  const [quizKey, setQuizKey] = useState(0)
+  const navigate = useNavigate()
+  const location = useLocation()
   const [user, setUser] = useState(null)
   const [selectedStyle, setSelectedStyle] = useState('analogy')
   const [loading, setLoading] = useState(false)
   const [explanation, setExplanation] = useState(null)
-  const [currentTopic, setCurrentTopic] = useState('')
+  const [currentTopic, setCurrentTopic] = useState(location.state?.prefillTopic || '')
   const [attempt, setAttempt] = useState(1)
   const [usedStyles, setUsedStyles] = useState([])
   const [explanationId, setExplanationId] = useState(null)
@@ -47,14 +50,11 @@ export default function Learn() {
   const [quizLoading, setQuizLoading] = useState(false)
   const [quizScore, setQuizScore] = useState(null)
   const [quizComplete, setQuizComplete] = useState(false)
-  const [showPostQuizOptions ]= useState(false)
+  
   const [postQuizRag, setPostQuizRag] = useState(null)
+  
 
-  const navigate = useNavigate()
-  const location = useLocation()
-  useEffect(() => {
-    if (location.state?.prefillTopic) setCurrentTopic(location.state.prefillTopic)
-  }, [location.state])
+
 
   useEffect(() => {
     async function loadUser() {
@@ -95,6 +95,8 @@ export default function Learn() {
     setQuizLoading(false)
     setQuizScore(null)
     setQuizComplete(false)
+    setPostQuizRag(null)
+    setHideExplanation(false)
   }
 
   async function handleExplain(topic, style, attemptNum, used) {
@@ -219,6 +221,17 @@ export default function Learn() {
     setQuizComplete(true)
   }
 
+  function retakeQuiz() {
+  setQuizComplete(false)
+  setQuizScore(null)
+  setPostQuizRag(null)
+  setQuestions([])
+  setQuizKey(k => k + 1)
+  setHideExplanation(true)
+  setShowQuiz(true)
+  fetchQuiz()
+}
+
   async function handleBookmark() {
     if (!explanationId || isBookmarked) return
     try {
@@ -297,9 +310,20 @@ export default function Learn() {
                   🔖 <span>{isBookmarked ? 'Saved' : 'Save'}</span>
                 </button>
               </div>
+              {showQuiz && !quizComplete && (
+              <button
+                className="btn-ghost"
+                style={{ width: 'auto', marginBottom: 12 }}
+                onClick={() => setHideExplanation(h => !h)}
+              >
+                {hideExplanation ? 'Show explanation' : 'Hide explanation'}
+              </button>
+            )}
+            {!hideExplanation && (
               <div className="explanation-text">
                 <ReactMarkdown>{explanation}</ReactMarkdown>
               </div>
+            )}
             </div>
 
             {/* RAG rating */}
@@ -353,7 +377,7 @@ export default function Learn() {
                       className="style-picker-btn"
                       onClick={() => handleStylePick(style)}
                     >
-                      {style}
+                      {STYLE_LABELS[style]}
                     </button>
                   ))}
                 </div>
@@ -397,7 +421,7 @@ export default function Learn() {
                   <button
                     className="btn-primary"
                     style={{ width: 'auto' }}
-                    onClick={() => { setShowQuiz(true); fetchQuiz() }}
+                    onClick={() => { setShowQuiz(true); setHideExplanation(true); fetchQuiz() }}
                   >
                     Start quiz →
                   </button>
@@ -425,6 +449,7 @@ export default function Learn() {
 
                 {!quizLoading && questions.length > 0 && !quizComplete && (
                   <QuizCard
+                    key={quizKey}
                     questions={questions}
                     onComplete={handleQuizComplete}
                     onSkip={handleQuizSkip}
@@ -475,6 +500,9 @@ export default function Learn() {
         >
           Learn another topic →
         </button>
+        <button className="btn-ghost" style={{ width: 'auto' }} onClick={retakeQuiz}>
+        Retake quiz
+        </button>
         <button
           className="btn-ghost"
           style={{ width: 'auto' }}
@@ -486,7 +514,7 @@ export default function Learn() {
     )}
 
     {/* Low score — ask how they feel now */}
-    {quizScore !== null && quizScore < 80 && !showPostQuizOptions && (
+    {quizScore !== null && quizScore < 80 && postQuizRag === null && (
       <div style={{ marginTop: 16 }}>
         <p className="rag-label">How do you feel about this topic now?</p>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
@@ -522,6 +550,9 @@ export default function Learn() {
         >
           Learn another topic →
         </button>
+        <button className="btn-ghost" style={{ width: 'auto' }} onClick={retakeQuiz}>
+  Retake quiz
+        </button>
         <button
           className="btn-ghost"
           style={{ width: 'auto' }}
@@ -538,11 +569,7 @@ export default function Learn() {
         <button
           className="btn-primary"
           style={{ width: 'auto' }}
-          onClick={() => {
-            setQuizComplete(false)
-            setQuizScore(null)
-            setPostQuizRag(null)
-          }}
+          onClick={retakeQuiz}
         >
           Retry quiz
         </button>

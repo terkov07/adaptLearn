@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import API_URL from '../api'
+import QuizCard from '../components/QuizCard'
+import Navbar from '../components/Navbar'
 
 // ─── Main CourseDetail page ───────────────────────────────────────────────────
 export default function CourseDetail() {
+  
   const { id } = useParams()
   const navigate = useNavigate()
+  
 
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -15,6 +19,7 @@ export default function CourseDetail() {
   const [deadlines, setDeadlines] = useState([])
   const [showAddDeadline, setShowAddDeadline] = useState(false)
   const [newDeadline, setNewDeadline] = useState({ type: 'exam', title: '', due_date: '' })
+  const [user, setUser] = useState(null)
 
   const TYPE_META = {
   exam:       { label: 'Exam',       color: '#E8735C' },
@@ -79,6 +84,20 @@ async function removeDeadline(deadlineId) {
   }
 }
 
+async function deleteCourse() {
+  if (!window.confirm('Delete this course, its topics and deadlines? This cannot be undone.')) return
+  try {
+    const res = await fetch(`${API_URL}/api/courses/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    if (res.ok) navigate('/courses')
+    else alert('Could not delete the course.')
+  } catch {
+    alert('Could not connect to server.')
+  }
+}
+
   
 useEffect(() => {
   async function load() {
@@ -100,6 +119,21 @@ useEffect(() => {
   }
   load()
 }, [id, navigate])
+
+useEffect(() => {
+  async function loadUser() {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setUser(data.user)
+      }
+    } catch {
+      // navbar still renders without a user
+    }
+  }
+  loadUser()
+}, [])
 
   async function markTopicComplete(topicId) {
     try {
@@ -134,16 +168,10 @@ useEffect(() => {
 
   return (
     <div className="dashboard">
-      <nav className="navbar">
-        <button className="navbar-back" onClick={() => navigate('/courses')}>
-          ← Courses
-        </button>
-        <span className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <img src="/favicon.png" alt="" style={{ width: 24, height: 24, borderRadius: 6 }} />
-          myadaptlearn
-        </span>
-      </nav>
-
+    <Navbar user={user} />
+    <button className="new-topic-btn" style={{ margin: '12px 16px' }} onClick={() => navigate('/courses')}>
+  ← Courses
+    </button>
       <div className="cd-layout">
 
         {/* Sidebar checklist */}
@@ -261,7 +289,25 @@ useEffect(() => {
         </div>
 
         {/* Main content */}
-        <div className="cd-main">
+          <div className="cd-main">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+  <button
+    className="btn-ghost"
+    style={{
+  width: 'auto',
+  color: '#C0392B',
+  background: '#FDECEA',
+  border: '1.5px solid #C0392B',
+  fontWeight: 700,
+  fontSize: 13,
+  padding: '6px 14px',
+  borderRadius: 8,
+}}
+    onClick={deleteCourse}
+  >
+    Delete course
+  </button>
+</div>
           {activeTopic ? (
             <div>
               <div className="cd-active-header">
@@ -423,7 +469,7 @@ function CourseLearner({ topic, docText, educationLevel, examBoard, specCode, on
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ explanation_text: explanation, num_questions: numQuestions })
+        body: JSON.stringify({ explanation_text: explanation, num_questions: numQuestions, education_level: educationLevel || null })
       })
       const data = await res.json()
       setQuestions(res.ok ? (data.questions || []) : [])
@@ -636,7 +682,7 @@ function CourseLearner({ topic, docText, educationLevel, examBoard, specCode, on
               {quizLoading && <p className="loading-text">Generating questions...</p>}
 
               {!quizLoading && questions.length > 0 && !quizComplete && (
-                <QuizCardInline
+                <QuizCard
                   questions={questions}
                   explanationId={explanationId}
                   onComplete={(score) => { setQuizScore(score); setQuizComplete(true) }}
@@ -669,90 +715,3 @@ function CourseLearner({ topic, docText, educationLevel, examBoard, specCode, on
   )
 }
 
-// ─── Inline quiz card ─────────────────────────────────────────────────────────
-function QuizCardInline({ questions, explanationId, onComplete, onSkip }) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [answers, setAnswers] = useState([])
-  const [selected, setSelected] = useState(null)
-  const [answered, setAnswered] = useState(false)
-  const [done, setDone] = useState(false)
-
-  const q = questions[currentIndex]
-  const isCorrect = answered && selected === q.correct_index
-
-  function handleSubmit() {
-    if (selected === null) return
-    setAnswered(true)
-    const newAnswers = [...answers, selected]
-    setAnswers(newAnswers)
-
-    if (currentIndex >= questions.length - 1) {
-      if (explanationId) {
-        fetch(`${API_URL}/api/quiz/submit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ explanation_id: explanationId, questions, answers: newAnswers })
-        })
-      }
-      setTimeout(() => {
-        const correct = newAnswers.filter((a, i) => a === questions[i].correct_index).length
-        setDone(true)
-        onComplete(Math.round((correct / questions.length) * 100))
-      }, 1000)
-    }
-  }
-
-  function handleNext() {
-    setCurrentIndex(currentIndex + 1)
-    setSelected(null)
-    setAnswered(false)
-  }
-
-  if (done) return null
-
-  return (
-    <div className="quiz-card">
-      <div className="quiz-header">
-        <span className="quiz-progress">Question {currentIndex + 1} of {questions.length}</span>
-        <button className="quiz-skip" onClick={onSkip}>Skip quiz →</button>
-      </div>
-      <p className="quiz-question">{q.question}</p>
-      <div className="quiz-options">
-        {q.options.map((opt, i) => {
-          let cls = 'quiz-option'
-          if (answered) {
-            if (i === q.correct_index) cls += ' quiz-option-correct'
-            else if (i === selected) cls += ' quiz-option-wrong'
-          } else if (i === selected) cls += ' quiz-option-selected'
-          return (
-            <button key={i} className={cls}
-              onClick={() => !answered && setSelected(i)}
-              disabled={answered}
-            >
-              {opt}
-            </button>
-          )
-        })}
-      </div>
-      {!answered && (
-        <button className="btn-primary" onClick={handleSubmit}
-          disabled={selected === null} style={{ marginTop: 16 }}>
-          Submit answer
-        </button>
-      )}
-      {answered && (
-        <>
-          <p className={`quiz-feedback ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`}>
-            {isCorrect ? '✓ Correct!' : `✗ Correct answer: ${q.options[q.correct_index]}`}
-          </p>
-          {currentIndex < questions.length - 1 && (
-            <button className="btn-primary" style={{ marginTop: 12, width: 'auto' }} onClick={handleNext}>
-              Next question →
-            </button>
-          )}
-        </>
-      )}
-    </div>
-  )
-}
